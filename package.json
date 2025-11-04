@@ -1,0 +1,30 @@
+{
+  "name": "crud-api-website",
+  "version": "1.0.0",
+  "description": "Website using CRUD API to work with a database of puppies",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshuapfeil/CRUD-API-website.git"
+  },
+  "keywords": [
+    "CRUD"
+  ],
+  "author": "Joshua Pfeil",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshuapfeil/CRUD-API-website/issues"
+  },
+  "homepage": "https://github.com/joshuapfeil/CRUD-API-website#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-validator": "^7.2.1",
+    "index.js": "^0.0.3",
+    "multer": "^2.0.2",
+    "sqlite3": "^5.1.7"
+  }
+}
