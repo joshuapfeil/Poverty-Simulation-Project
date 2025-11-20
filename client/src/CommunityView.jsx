@@ -1,3 +1,8 @@
+/*
+  This page is going to be a community view used for routing. Replace with a real
+  community dashboard when building that part of the app.
+*/
+
 import React from 'react'
 
 export default function CommunityView() {

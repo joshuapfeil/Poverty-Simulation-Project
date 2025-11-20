@@ -1,3 +1,13 @@
+/*
+  This is the Main React application routes and basic home view. 
+  It basically serves as the router and landing page for the app.
+  Rn it registers routes for -->
+  Home, Admin, Login, Family and Community pages
+  and fetches families for the home listing.
+  --------
+  The way it looks def needs some work
+*/
+
 import React, { useEffect, useState } from 'react'
 import { Routes, Route, Link } from 'react-router-dom'
 import FamiliesAdmin from './FamiliesAdmin'
@@ -21,19 +31,11 @@ function Home() {
       .finally(() => setLoading(false))
   }, [])
 
+  //this return is where the changes to the home page are made
   return (
     <div style={{ padding: 20 }}>
-      <h1>Poverty Simulation — Families</h1>
-  <p><Link to="/admin">Go to Admin</Link> · <Link to="/login">Login</Link></p>
-      {loading && <p>Loading...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-      {!loading && !error && (
-        <ul>
-          {families.map((f) => (
-            <li key={f.id}>{f.name} — ${f.bank_total || 0}</li>
-          ))}
-        </ul>
-      )}
+      <h1>Poverty Simulation Website</h1>
+  <p> <Link to="/login">Login</Link></p>
     </div>
   )
 }

@@ -1,3 +1,7 @@
+  /*
+    This will be the page for a family user. 
+  */
+
 import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 

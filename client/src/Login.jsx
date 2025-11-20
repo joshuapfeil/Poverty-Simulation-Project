@@ -1,3 +1,8 @@
+/*
+  Login page. Def gonna need to work on that functionality. Also how/where do we wanna
+  manage user accounts and roles? Credentials storage?
+*/
+
 import React from 'react'
 import { Link } from 'react-router-dom'
 

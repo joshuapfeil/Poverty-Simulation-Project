@@ -1,3 +1,10 @@
+/*
+    Express server entrypoint. Exposes API endpoints for `families` and
+    `people`, serves legacy `public/` static files during development, and
+    when available serves the built React client from `client/dist` in
+    production. Start this with `node index.js` (or use `npm start`).
+*/
+
 //Libraries
 const express = require('express');
 const multer = require('multer');
@@ -5,8 +12,8 @@ const mysql = require('sqlite3').verbose();
 const { check, validationResult } = require('express-validator');
 const cors = require('cors');
 const families = require('./model/family');
+const people = require('./model/person');
 
-//Setup defaults for script
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -16,7 +23,6 @@ const port = 3000 //Default port to http server
 const fs = require('fs');
 const path = require('path');
 
-// Serve legacy `public/` for any remaining static assets (backups/placeholder pages).
 app.use(express.static(path.join(__dirname, 'public')));
 
 // If a built React app exists at client/dist, serve it in production.
@@ -24,12 +30,10 @@ const clientDist = path.join(__dirname, 'client', 'dist');
 if (fs.existsSync(clientDist)) {
     app.use(express.static(clientDist));
 
-    // For any non-API GET route, send the client index.html so React Router can handle routing.
-    // Use a simple middleware instead of an express route pattern to avoid path-to-regexp issues.
     app.use((req, res, next) => {
         if (req.method !== 'GET') return next();
         // Let API routes continue to their handlers
-        if (req.path.startsWith('/families') || req.path.startsWith('/api')) return next();
+        if (req.path.startsWith('/families') || req.path.startsWith('/people') || req.path.startsWith('/api')) return next();
         res.sendFile(path.join(clientDist, 'index.html'));
     });
 }
@@ -93,6 +97,70 @@ app.delete('/families/:id', async (request, response) => {
     } catch (error) {
         console.error(error);
         return response.status(500).json({ message: 'Failed to delete family' });
+    }
+});
+
+
+// --- People API ---
+// get all people (optionally filtered by family_id)
+app.get('/people', async (request, response) => {
+    try {
+        const filter = {};
+        if (request.query.family_id) filter.family_id = request.query.family_id;
+        const all = await people.getAll(filter);
+        return response.status(200).json({ data: all });
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ message: 'Something went wrong with the server.' });
+    }
+});
+
+// get single person
+app.get('/people/:id', async (request, response) => {
+    try {
+        const rec = await people.get(request.params.id);
+        return response.status(200).json({ data: rec });
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ message: 'Something went wrong with the server.' });
+    }
+});
+
+// create a person
+app.post('/people', async (request, response) => {
+    try {
+        const body = request.body;
+        await people.insert({ body });
+        const all = await people.getAll({ family_id: body.family_id });
+        return response.status(201).json({ data: all });
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ message: 'Failed to create person' });
+    }
+});
+
+// update a person
+app.put('/people/:id', async (request, response) => {
+    try {
+        const body = request.body;
+        body.id = request.params.id;
+        await people.edit({ body });
+        const all = await people.getAll({ family_id: body.family_id });
+        return response.status(200).json({ data: all });
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ message: 'Failed to update person' });
+    }
+});
+
+// delete a person
+app.delete('/people/:id', async (request, response) => {
+    try {
+        await people.deleteById(request.params.id);
+        return response.status(200).json({ data: [] });
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ message: 'Failed to delete person' });
     }
 });
 

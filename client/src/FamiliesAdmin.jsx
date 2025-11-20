@@ -1,12 +1,22 @@
+/*
+  This is the Admin page for managing families. Lists families, allows adding and
+  editing of name, bank total and monthly bills, and provides a People
+  button to manage household members for each family.
+*/
+
 import React, { useEffect, useState } from 'react'
+import PeopleManager from './PeopleManager'
 
 export default function FamiliesAdmin() {
   const [families, setFamilies] = useState([])
   const [name, setName] = useState('')
   const [bankTotal, setBankTotal] = useState('')
+  const [monthlyBills, setMonthlyBills] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
   const [editBank, setEditBank] = useState('')
+  const [editMonthly, setEditMonthly] = useState('')
+  const [showPeople, setShowPeople] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -34,7 +44,7 @@ export default function FamiliesAdmin() {
       const res = await fetch('/families/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, bank_total: Number(bankTotal) || 0 })
+        body: JSON.stringify({ name, bank_total: Number(bankTotal) || 0, monthly_bills: Number(monthlyBills) || 0 })
       })
       if (!res.ok) {
         const txt = await res.text().catch(() => null)
@@ -44,6 +54,7 @@ export default function FamiliesAdmin() {
       setFamilies(json.data || [])
       setName('')
       setBankTotal('')
+      setMonthlyBills('')
     } catch (err) {
       setError(err.message)
     }
@@ -67,12 +78,14 @@ export default function FamiliesAdmin() {
     setEditingId(f.id)
     setEditName(f.name || '')
     setEditBank(f.bank_total || '')
+    setEditMonthly(f.monthly_bills || '')
   }
 
   const cancelEdit = () => {
     setEditingId(null)
     setEditName('')
     setEditBank('')
+    setEditMonthly('')
   }
 
   const saveEdit = async (id) => {
@@ -80,7 +93,7 @@ export default function FamiliesAdmin() {
       const res = await fetch(`/families/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editName, bank_total: Number(editBank) || 0 })
+        body: JSON.stringify({ name: editName, bank_total: Number(editBank) || 0, monthly_bills: Number(editMonthly) || 0 })
       })
       if (!res.ok) {
         const txt = await res.text().catch(() => null)
@@ -116,6 +129,10 @@ export default function FamiliesAdmin() {
           <label>Bank total</label><br />
           <input type="number" value={bankTotal} onChange={(e) => setBankTotal(e.target.value)} />
         </div>
+        <div>
+          <label>Monthly bills</label><br />
+          <input type="number" value={monthlyBills} onChange={(e) => setMonthlyBills(e.target.value)} />
+        </div>
         <button type="submit">Add Family</button>
       </form>
 
@@ -131,31 +148,40 @@ export default function FamiliesAdmin() {
       {!loading && (
         <ul>
           {filtered.map((f) => (
-            <li key={f.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ flex: 1 }}>
-                {editingId === f.id ? (
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                    <input value={editBank} onChange={(e) => setEditBank(e.target.value)} placeholder="bank total" type="number" />
-                  </div>
-                ) : (
-                  <div>{f.name} — ${f.bank_total}</div>
-                )}
-              </div>
-              <div>
-                {editingId === f.id ? (
-                  <>
-                    <button onClick={() => saveEdit(f.id)}>Save</button>
-                    <button onClick={cancelEdit} style={{ marginLeft: 8 }}>Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => startEdit(f)}>Edit</button>
-                    <button onClick={() => handleDelete(f.id)} style={{ marginLeft: 8 }}>Delete</button>
-                  </>
-                )}
-              </div>
-            </li>
+            <React.Fragment key={f.id}>
+              <li style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  {editingId === f.id ? (
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                      <input value={editBank} onChange={(e) => setEditBank(e.target.value)} placeholder="bank total" type="number" />
+                      <input value={editMonthly} onChange={(e) => setEditMonthly(e.target.value)} placeholder="monthly bills" type="number" />
+                    </div>
+                  ) : (
+                    <div>{f.name} — ${f.bank_total} — Bills: ${f.monthly_bills || 0}</div>
+                  )}
+                </div>
+                <div>
+                  {editingId === f.id ? (
+                    <>
+                      <button onClick={() => saveEdit(f.id)}>Save</button>
+                      <button onClick={cancelEdit} style={{ marginLeft: 8 }}>Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => startEdit(f)}>Edit</button>
+                      <button onClick={() => handleDelete(f.id)} style={{ marginLeft: 8 }}>Delete</button>
+                      <button onClick={() => setShowPeople(prev => ({ ...prev, [f.id]: !prev[f.id] }))} style={{ marginLeft: 8 }}>People</button>
+                    </>
+                  )}
+                </div>
+              </li>
+              {showPeople[f.id] && (
+                <li style={{ listStyle: 'none' }}>
+                  <PeopleManager familyId={f.id} />
+                </li>
+              )}
+            </React.Fragment>
           ))}
         </ul>
       )}

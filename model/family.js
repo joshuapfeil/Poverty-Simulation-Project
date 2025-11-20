@@ -1,3 +1,8 @@
+/*
+    Data model for `families` table. Provides CRUD functions used by the
+    to list, insert, update and delete family records.
+*/
+
 const connection = require('./connection');
 
 async function get(id) {
@@ -13,7 +18,7 @@ async function getAll() {
 }
 
 async function insert(parameters = {}) {
-    let insertSql = `INSERT INTO families (name, bank_total) VALUES (?,?)`;
+    let insertSql = `INSERT INTO families (name, bank_total, monthly_bills) VALUES (?,?,?)`;
     let queryParameters = [];
     if (typeof parameters.body.name !== 'undefined' && parameters.body.name.length > 0) {
         queryParameters.push(parameters.body.name);
@@ -23,6 +28,12 @@ async function insert(parameters = {}) {
 
     if (typeof parameters.body.bank_total !== 'undefined' && parameters.body.bank_total !== null && parameters.body.bank_total !== '') {
         queryParameters.push(parameters.body.bank_total);
+    } else {
+        queryParameters.push(0);
+    }
+
+    if (typeof parameters.body.monthly_bills !== 'undefined' && parameters.body.monthly_bills !== null && parameters.body.monthly_bills !== '') {
+        queryParameters.push(parameters.body.monthly_bills);
     } else {
         queryParameters.push(0);
     }
@@ -43,6 +54,11 @@ async function edit(parameters = {}) {
     if (typeof parameters.body.bank_total !== 'undefined' && parameters.body.bank_total !== null && parameters.body.bank_total !== '') {
         sets.push('bank_total = ?');
         queryParameters.push(parameters.body.bank_total);
+    }
+
+    if (typeof parameters.body.monthly_bills !== 'undefined' && parameters.body.monthly_bills !== null && parameters.body.monthly_bills !== '') {
+        sets.push('monthly_bills = ?');
+        queryParameters.push(parameters.body.monthly_bills);
     }
 
     if (sets.length === 0) return;
