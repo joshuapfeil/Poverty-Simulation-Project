@@ -4,6 +4,10 @@
   button to manage household members for each family.
 */
 
+//redo monthly bills - there are going to be multiple fields with multiple amounts
+
+//question - does admin page need to record community member accounts??
+
 import React, { useEffect, useState } from 'react'
 import PeopleManager from './PeopleManager'
 
