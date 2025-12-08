@@ -1,6 +1,6 @@
 /*
   This code helps connect to a SQLite database and run queries.
-  It makes sure the database file exists and creates the necessary tables (families and people) if they’re missing.
+  It makes sure the database file exists and creates the necessary tables (families and people) if they're missing.
   It provides a function called `query(sql, params)` that you can use to run SQL commands and get results.
   --- Exposes `query(sql, params)` which returns rows as a Promise. ----
 
@@ -19,23 +19,52 @@ function query(sql, params) {
             });
             console.log("Connected to SQLite database.");
 
-            // Create families table with bank_total and monthly_bills (if not exists)
+            // Create families table with bank_total and individual bill fields
             db.run(
                 `CREATE TABLE IF NOT EXISTS families (
                     id INTEGER PRIMARY KEY,
                     name TEXT,
                     bank_total REAL DEFAULT 0,
-                    monthly_bills REAL DEFAULT 0
+                    monthly_bills REAL DEFAULT 0,
+                    housing_mortgage REAL DEFAULT 0,
+                    housing_taxes REAL DEFAULT 0,
+                    housing_maintenance REAL DEFAULT 0,
+                    utilities_gas REAL DEFAULT 0,
+                    utilities_electric REAL DEFAULT 0,
+                    utilities_phone REAL DEFAULT 0,
+                    student_loans REAL DEFAULT 0,
+                    food_weekly REAL DEFAULT 0,
+                    clothing REAL DEFAULT 0,
+                    credit_card REAL DEFAULT 0,
+                    automobile_loan REAL DEFAULT 0
                 );`
             );
 
-            // Ensure monthly_bills column exists for older DBs (ALTER if required) (MY PRAGMA)
+            // Ensure all bill columns exist for older DBs (ALTER if required)
             db.all("PRAGMA table_info(families);", [], (err, cols) => {
                 if (!err && Array.isArray(cols)) {
                     const names = cols.map(c => c.name);
-                    if (!names.includes('monthly_bills')) {
-                        db.run("ALTER TABLE families ADD COLUMN monthly_bills REAL DEFAULT 0;");
-                    }
+                    const columnsToAdd = [
+                        'monthly_bills',
+                        'housing_mortgage',
+                        'housing_taxes',
+                        'housing_maintenance',
+                        'utilities_gas',
+                        'utilities_electric',
+                        'utilities_phone',
+                        'student_loans',
+                        'food_weekly',
+                        'clothing',
+                        'credit_card',
+                        'automobile_loan'
+                    ];
+                    
+                    columnsToAdd.forEach(col => {
+                        if (!names.includes(col)) {
+                            db.run(`ALTER TABLE families ADD COLUMN ${col} REAL DEFAULT 0;`);
+                            console.log(`Added column: ${col}`);
+                        }
+                    });
                 }
             });
 
