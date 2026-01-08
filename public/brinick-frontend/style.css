@@ -1,0 +1,38 @@
+.colors{
+    color: #821919; /*red for buttons */
+    color: #00263a; /*blue for text*/
+    color: #bababa; /*button*/
+    color: #fcfcfc; /*background*/
+}
+h1{
+    color: #821919;
+    font-family: "Roboto", sans-serif;
+}
+.banner-header {
+    display: flex;
+    justify-content: center; /* Centers the image horizontally */
+    align-items: center;     /* Centers the image vertically */
+    height: 80px;           /* Set a specific height for the banner area */
+    background-color: #00263a; /* Optional: Adds a background color */
+    width: 100%;             /* Ensures the header spans the full width */
+}
+
+.header-image {
+    width:60px;         /* Ensures the image is responsive and stays within the banner width */
+    height:40px;           /* Maintains the image's aspect ratio */
+}
+
+.container-fluid{
+    padding-left: 0rem;
+    padding-right: 0rem;
+    overflow: hidden;
+}
+
+.roboto-font{
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 300; /*from 100 to 900*/
+  font-style: normal;
+  font-variation-settings:
+    "wdth" 100;
+}
