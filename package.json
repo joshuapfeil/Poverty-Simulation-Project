@@ -1,5 +1,5 @@
 {
-  "name": "crud-api-website",
+  "name": "poverty-simulation-project",
   "version": "1.0.0",
   "description": "Website using CRUD API to work poverty simulation project",
   "main": "index.js",
