@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: poverty-sim-api
+    env: node
+    plan: free
+    branch: main
+    buildCommand: npm ci
+    startCommand: node index.js
+    rootDir: .
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  - type: static
+    name: poverty-sim-client
+    env: static
+    plan: free
+    branch: main
+    buildCommand: cd client && npm ci && npm run build
+    staticPublishPath: client/dist
+    rootDir: .
