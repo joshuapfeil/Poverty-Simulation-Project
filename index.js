@@ -18,7 +18,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const upload = multer()
-const port = 3000 //Default port to http server
+const port = process.env.PORT || 3000; //Default port to http server
 
 const fs = require('fs');
 const path = require('path');
