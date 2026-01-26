@@ -110,6 +110,16 @@ button:hover {
     align-items: center;
 }
 
+#login {
+    border: 3px solid #eaeaea;
+    border-radius: 10px;
+    justify-content: center;
+    text-align: center;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 td {
     font-weight: normal;
     border: 1px solid black;

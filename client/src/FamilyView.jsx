@@ -98,7 +98,7 @@ export default function FamilyView() {
   }
 
   return (
-    <div style={{ padding: 20, maxWidth: '800px' }}>
+    <div style={{ padding: 20 }}>
       <h1>Family Account View</h1>
       {!id && <p>No family selected. Use <code>?id=1</code> in the URL to view a family (placeholder).</p>}
       {loading && <p>Loading...</p>}
