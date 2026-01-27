@@ -87,9 +87,9 @@ export default function Utility() {
                 body: JSON.stringify({
                     ...selectedFamily,
                     bank_total: currentBalance - amount, 
-                    utilities_gas: billType === 'gas' ? 0 : selectedFamily.utilities_gas,
-                    utilities_phone: billType === 'phone' ? 0 : selectedFamily.utilities_phone,
-                    utilities_electric: billType === 'electric' ? 0 : selectedFamily.utilities_electric
+                    utilities_gas: billType === 'gas' ? Math.max(0, selectedFamily.utilities_gas - amount) : selectedFamily.utilities_gas,
+                    utilities_phone: billType === 'phone' ? Math.max(0, selectedFamily.utilities_phone - amount) : selectedFamily.utilities_phone,
+                    utilities_electric: billType === 'electric' ? Math.max(0, selectedFamily.utilities_electric - amount) : selectedFamily.utilities_electric
                 })
             })
 
