@@ -1,24 +1,21 @@
 {
-  "name": "crud-api-website",
+  "name": "poverty-simulation-project",
   "version": "1.0.0",
-  "description": "Website using CRUD API to work with a database of puppies",
+  "description": "Website using CRUD API to work poverty simulation project",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "build": "cd client && npm ci && npm run build",
+    "client:build": "cd client && npm ci && npm run build",
+    "postinstall": "cd client && npm ci",
     "test": "node index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/joshuapfeil/CRUD-API-website.git"
-  },
+ 
   "keywords": [
     "CRUD"
   ],
   "author": "Joshua Pfeil",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/joshuapfeil/CRUD-API-website/issues"
-  },
-  "homepage": "https://github.com/joshuapfeil/CRUD-API-website#readme",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0",

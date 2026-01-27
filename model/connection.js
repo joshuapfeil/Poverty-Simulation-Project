@@ -1,9 +1,16 @@
+/*
+  This code helps connect to a SQLite database and run queries.
+  It makes sure the database file exists and creates the necessary tables (families and people) if they're missing.
+  It provides a function called `query(sql, params)` that you can use to run SQL commands and get results.
+  --- Exposes `query(sql, params)` which returns rows as a Promise. ----
+
+*/
+
 const sqlite3 = require('sqlite3').verbose();
 let db = null;
 
 function query(sql, params) {
     return new Promise((resolve, reject) => {
-        // Singleton DB connection
         if (null === db) {
             db = new sqlite3.Database('./model/database.sqlite3', (err) => {
                 if (err) {
@@ -12,8 +19,67 @@ function query(sql, params) {
             });
             console.log("Connected to SQLite database.");
 
-            db.run("CREATE TABLE IF NOT EXISTS puppies (id INTEGER PRIMARY KEY, name TEXT, breed_id INTEGER, color TEXT, size TEXT, cuteness INTEGER);");
-            db.run("CREATE TABLE IF NOT EXISTS breeds (id INTEGER PRIMARY KEY, name TEXT, average_size INTEGER, typical_color TEXT);");
+            // Create families table with bank_total and individual bill fields
+            db.run(
+                `CREATE TABLE IF NOT EXISTS families (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT,
+                    bank_total REAL DEFAULT 0,
+                    monthly_bills REAL DEFAULT 0,
+                    housing_mortgage REAL DEFAULT 0,
+                    housing_taxes REAL DEFAULT 0,
+                    housing_maintenance REAL DEFAULT 0,
+                    utilities_gas REAL DEFAULT 0,
+                    utilities_electric REAL DEFAULT 0,
+                    utilities_phone REAL DEFAULT 0,
+                    student_loans REAL DEFAULT 0,
+                    food_weekly REAL DEFAULT 0,
+                    clothing REAL DEFAULT 0,
+                    credit_card REAL DEFAULT 0,
+                    automobile_loan REAL DEFAULT 0
+                );`
+            );
+
+            // Ensure all bill columns exist for older DBs (ALTER if required)
+            db.all("PRAGMA table_info(families);", [], (err, cols) => {
+                if (!err && Array.isArray(cols)) {
+                    const names = cols.map(c => c.name);
+                    const columnsToAdd = [
+                        'monthly_bills',
+                        'housing_mortgage',
+                        'housing_taxes',
+                        'housing_maintenance',
+                        'utilities_gas',
+                        'utilities_electric',
+                        'utilities_phone',
+                        'student_loans',
+                        'food_weekly',
+                        'clothing',
+                        'credit_card',
+                        'automobile_loan'
+                    ];
+                    
+                    columnsToAdd.forEach(col => {
+                        if (!names.includes(col)) {
+                            db.run(`ALTER TABLE families ADD COLUMN ${col} REAL DEFAULT 0;`);
+                            console.log(`Added column: ${col}`);
+                        }
+                    });
+                }
+            });
+
+            // Create people table to store household members
+            db.run(
+                `CREATE TABLE IF NOT EXISTS people (
+                    id INTEGER PRIMARY KEY,
+                    name TEXT,
+                    family_id INTEGER,
+                    age INTEGER,
+                    is_working INTEGER DEFAULT 0,
+                    medical_needs TEXT,
+                    FOREIGN KEY(family_id) REFERENCES families(id) ON DELETE CASCADE
+                );`
+            );
         }
 
         db.all(sql, params, (err, rows) => {
