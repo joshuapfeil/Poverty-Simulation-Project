@@ -1,101 +1,207 @@
 //The bank is in charge of depositing checks and cash, withdrawing money, collecting loan amounts due, and converting TANF benefits.
 
-//The Add Funds and Withdraw functions should do as they say. No need for auto-populating.
-
-//Unless Janet suggests otherwise, accounts should be allowed to go into the negatives. If a bank teller wishes to deny a transaction based on that, it's up to them.
-
-//Loan payments work the same way as mortgage/rent payments. They can be paid in part. When an amount is subtracted, that should update the 'remaining' total. When that amount is zero, the box should gray out and it should say 'paid'.
-
-//This is an example. Delete it when you need to.
-
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 export default function Bank() {
+    const [families, setFamilies] = useState([])
+    const [selectedFamilyId, setSelectedFamilyId] = useState('')
+    const [selectedFamily, setSelectedFamily] = useState(null)
+    const [currentBalance, setBalance] = useState('')
+    const [depositAmount, setDepositAmount] = useState('')
+    const [withdrawAmount, setWithdrawAmount] = useState('')
+    const [autoLoanPayment, setAutoLoanPayment] = useState('')
+    const [studentLoanPayment, setStudentLoanPayment] = useState('')
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    // Fetch families on mount
+    useEffect(() => {
+        const fetchFamilies = () => {
+            setLoading(true)
+            fetch('/families/')
+                .then((r) => r.json())
+
+                //Polling Reload 
+                .then((j) => {
+                    setFamilies(j.data || [])
+                    if (selectedFamilyId) {
+                        const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
+                        if (updated) {
+                            setSelectedFamily(updated)
+                        }
+                    }
+                })
+                .catch((e) => setError(e.message))
+                .finally(() => setLoading(false))
+        }
+
+        fetchFamilies()
+
+        const interval = setInterval(fetchFamilies, 10000) // Polling Rate in Milliseconds ie 1000 = 1 second
+        return () => clearInterval(interval)
+    }, [selectedFamilyId])
+
+    // When a family is selected, populate the utility amounts
+    const handleFamilySelect = (e) => {
+        const familyId = e.target.value
+        setSelectedFamilyId(familyId)
+
+        if (familyId) {
+            const family = families.find(f => f.id === parseInt(familyId))
+            setSelectedFamily(family)
+            setBalance(family?.bank_total || 0)
+            setAutoLoanPayment(family?.automobile_loan || 0)
+            setStudentLoanPayment(family?.student_loans || 0)
+
+        } else {
+            setSelectedFamily(null)
+            setBalance('')
+            setAutoLoanPayment('')
+            setStudentLoanPayment('')
+        }
+    }
+
+    const handlePayment = async (billType) => {
+        if (!selectedFamily) {
+            setError('Please select a family')
+            return
+        }
+        const amount = billType === 'deposit' ? Number(depositAmount) :
+                    billType === 'withdraw' ? Number(withdrawAmount) :
+                    billType === 'autoLoan' ? Number(autoLoanPayment) :
+                    Number(studentLoanPayment)
+
+        if (!amount || amount <= 0) {
+            setError('Please enter a valid amount')
+            return
+        }
+
+        const currentBalance = Number(selectedFamily.bank_total || 0)
+
+        try {
+            const res = await fetch(`/families/${selectedFamily.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...selectedFamily,
+                    bank_total: billType === 'deposit' ? currentBalance + amount : billType === 'withdraw' ? currentBalance - amount : billType === 'autoLoan' ? currentBalance - amount : billType === 'studentLoan' ? currentBalance - amount : currentBalance,
+                    automobile_loan: billType === 'autoLoan' ? Math.max(0, selectedFamily.automobile_loan - amount) : selectedFamily.automobile_loan,
+                    student_loans: billType === 'studentLoan' ? Math.max(0, selectedFamily.student_loans - amount) : selectedFamily.student_loans
+                })
+            })
+
+            if (!res.ok) {
+                const txt = await res.text().catch(() => null)
+                throw new Error(txt || `Failed to process payment (${res.status})`)
+            }
+
+            const json = await res.json()
+            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            setSelectedFamily(updatedFamily)
+            setBalance(updatedFamily?.bank_total || 0)
+            setAutoLoanPayment(updatedFamily?.automobile_loan || 0)
+            setStudentLoanPayment(updatedFamily?.student_loans || 0)
+
+            // Clear inputs
+            if (billType === 'deposit') setDepositAmount('')
+            if (billType === 'withdraw') setWithdrawAmount('')
+            if (billType === 'autoLoan') setAutoLoanPayment('')
+            if (billType === 'studentLoan') setStudentLoanPayment('')
+
+            setError(null)
+        } catch (err) {
+            setError(err.message)
+        }
+    }
+
+    if (loading) {
+        return <div style={{ padding: 20 }}>Loading Utilities...</div>
+    }
+
+
     return (
-        <div style={{ padding: 20 }}>
+        <div style={{ padding: 20 }} className='containter'>
             <h1>U Trust US National Bank</h1>
-            {/* May become form fields based on after talking to Janet*/}
-            <p>Example (what it would look like)</p>
-            <div className="container">
-                <div className="row">
-                    <div className="col-2">
-                        <p>Name</p>
-                    </div>
-                    <div className="col-1">
-                        <p>Amount</p>
-                    </div>
-                    <div className="col-3">
-                        <p>Add Funds to Account/Cash Check</p>
-                    </div>
-                    <div className="col-3">
-                        <p>Withdraw</p>
-                    </div>
-                    <div className="col-3">
-                        <p>Loan Payment</p>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-2">
-                        <p>Aber</p>
-                    </div>
-                    <div className="col-1">
-                        <p>$500</p>
-                    </div>
-                    <div className="col-3">
-                        <form>
-                            <label for="textbox">$</label>
-                            <input type="text" id="textbox" name="textbox"></input>
 
-                        </form><button>PAY</button>
-                    </div>
-                    <div className="col-3">
-                        <form>
-                            <label for="textbox">$</label>
-                            <input type="text" id="textbox" name="textbox"></input>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
 
-                        </form><button>PAY</button>
-                    </div>
-                    <div className="col-3">
-                        <p>550 remaining</p><br></br>
-                        <form>
-                            <label for="textbox">$</label>
-                            <input type="text" id="textbox" name="textbox"></input>
+            <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+                <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Family:</label>
+                <select
+                    value={selectedFamilyId}
+                    onChange={handleFamilySelect}
+                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
 
-                        </form><button>PAY</button>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-2">
-                        <p>Boling</p>
-                    </div>
-                    <div className="col-1">
-                        <p>$600</p>
-                    </div>
-                    <div className="col-3">
-                        <form>
-                            <label for="textbox">$</label>
-                            <input type="text" id="textbox" name="textbox"></input>
-
-                        </form><button>PAY</button>
-                    </div>
-                    <div className="col-3">
-                        <form>
-                            <label for="textbox">$</label>
-                            <input type="text" id="textbox" name="textbox"></input>
-
-                        </form><button>PAY</button>
-                    </div>
-                    <div className="col-3">
-                        <p>400 remaining</p><br></br>
-                        <form>
-                            <label for="textbox">$</label>
-                            <input type="text" id="textbox" name="textbox"></input>
-
-                        </form><button>PAY</button>
-                    </div>
-                </div>
+                    <option value="">-- Choose a family --</option>
+                    {families.map(family => (
+                        <option key={family.id} value={family.id}>
+                            {family.name}
+                        </option>
+                    ))}
+                </select>
             </div>
 
+
+            {selectedFamily && (
+                <div>
+                    <h2>{selectedFamily.name}</h2>
+                    <p>Bank Balance: ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+
+                    <div>
+                        <div>
+                            <h4>Deposit</h4>
+                            <input
+                                type="number"
+                                value={depositAmount}
+                                onChange={(e) => setDepositAmount(e.target.value)}
+                            />
+
+                            <button onClick={() => handlePayment('deposit')}>Deposit</button>
+
+                        </div>
+
+                        <div>
+                            <h4>Withdraw</h4>
+                            <input
+                                type="number"
+                                value={withdrawAmount}
+                                onChange={(e) => setWithdrawAmount(e.target.value)}
+                            />
+
+                            <button onClick={() => handlePayment('withdraw')}>Withdraw</button>
+                        </div>
+
+                        <div>
+                            <h4>Auto Loan Payment</h4>
+                            <p>
+                                ${(selectedFamily.automobile_loan || 0).toFixed(2)}
+                            </p>
+                            <input
+                                type="number"
+                                value={autoLoanPayment}
+                                onChange={(e) => setAutoLoanPayment(e.target.value)}
+                            />
+
+                            <button onClick={() => handlePayment('autoLoan')}>Pay Auto Loan</button>
+                        </div>
+
+                        <div>
+                            <h4>Student Loan Payment</h4>
+                            <p>
+                                ${(selectedFamily.student_loans || 0).toFixed(2)}
+                            </p>
+                            <input
+                                type="number"
+                                value={studentLoanPayment}
+                                onChange={(e) => setStudentLoanPayment(e.target.value)}
+                            />
+
+                            <button onClick={() => handlePayment('studentLoan')}>Pay Student Loan</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
+
