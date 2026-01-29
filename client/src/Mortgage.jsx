@@ -1,4 +1,4 @@
-// Mortgage office takes mortgage payments from homeowners
+// Mortgage office takes mortgage, tax, and maintenance payments from families
 
 import React, { useEffect, useState } from 'react'
 
@@ -7,6 +7,8 @@ export default function Mortgage() {
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
     const [mortgagePayment, setMortgagePayment] = useState('')
+    const [taxesPayment, setTaxesPayment] = useState('')
+    const [maintenancePayment, setMaintenancePayment] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
@@ -38,7 +40,7 @@ export default function Mortgage() {
         return () => clearInterval(interval)
     }, [selectedFamilyId])
 
-    // When a family is selected, populate the mortgage amount
+    // When a family is selected, populate the payment amounts
     const handleFamilySelect = (e) => {
         const familyId = e.target.value
         setSelectedFamilyId(familyId)
@@ -47,19 +49,25 @@ export default function Mortgage() {
             const family = families.find(f => f.id === parseInt(familyId))
             setSelectedFamily(family)
             setMortgagePayment(family?.housing_mortgage || 0)
+            setTaxesPayment(family?.housing_taxes || 0)
+            setMaintenancePayment(family?.housing_maintenance || 0)
         } else {
             setSelectedFamily(null)
             setMortgagePayment('')
+            setTaxesPayment('')
+            setMaintenancePayment('')
         }
     }
 
-    const handlePayment = async () => {
+    const handlePayment = async (billType) => {
         if (!selectedFamily) {
             setError('Please select a family')
             return
         }
 
-        const amount = Number(mortgagePayment)
+        const amount = billType === 'mortgage' ? Number(mortgagePayment) :
+            billType === 'taxes' ? Number(taxesPayment) :
+                Number(maintenancePayment)
 
         if (!amount || amount <= 0) {
             setError('Please enter a valid amount')
@@ -79,7 +87,9 @@ export default function Mortgage() {
                 body: JSON.stringify({
                     ...selectedFamily,
                     bank_total: currentBalance - amount,
-                    housing_mortgage: Math.max(0, selectedFamily.housing_mortgage - amount)
+                    housing_mortgage: billType === 'mortgage' ? Math.max(0, selectedFamily.housing_mortgage - amount) : selectedFamily.housing_mortgage,
+                    housing_taxes: billType === 'taxes' ? Math.max(0, selectedFamily.housing_taxes - amount) : selectedFamily.housing_taxes,
+                    housing_maintenance: billType === 'maintenance' ? Math.max(0, selectedFamily.housing_maintenance - amount) : selectedFamily.housing_maintenance
                 })
             })
 
@@ -91,7 +101,11 @@ export default function Mortgage() {
             const json = await res.json()
             const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
             setSelectedFamily(updatedFamily)
-            setMortgagePayment('')
+
+            if (billType === 'mortgage') setMortgagePayment('')
+            if (billType === 'taxes') setTaxesPayment('')
+            if (billType === 'maintenance') setMaintenancePayment('')
+
             setError(null)
         } catch (err) {
             setError(err.message)
@@ -101,9 +115,6 @@ export default function Mortgage() {
     if (loading) {
         return <div style={{ padding: 20 }}>Loading Mortgage & Realty...</div>
     }
-
-    // Filter to only show families with mortgages (homeowners)
-    const homeowners = families.filter(f => f.housing_mortgage && f.housing_mortgage > 0)
 
     return (
         <div style={{ padding: 20 }} className="container">
@@ -119,7 +130,7 @@ export default function Mortgage() {
                     style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
                 >
                     <option value="">-- Choose a family --</option>
-                    {homeowners.map(family => (
+                    {families.map(family => (
                         <option key={family.id} value={family.id}>
                             {family.name}
                         </option>
@@ -145,10 +156,48 @@ export default function Mortgage() {
                                 disabled={selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null}
                             />
                             <button
-                                onClick={handlePayment}
+                                onClick={() => handlePayment('mortgage')}
                                 disabled={selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null}
                             >
                                 {selectedFamily.housing_mortgage === 0 ? 'PAID' : 'PAY'}
+                            </button>
+                        </div>
+
+                        <div>
+                            <h4>Property Taxes</h4>
+                            <p>
+                                ${(selectedFamily.housing_taxes || 0).toFixed(2)}
+                            </p>
+                            <input
+                                type="number"
+                                value={taxesPayment}
+                                onChange={(e) => setTaxesPayment(e.target.value)}
+                                disabled={selectedFamily.housing_taxes === 0 || selectedFamily.housing_taxes === null}
+                            />
+                            <button
+                                onClick={() => handlePayment('taxes')}
+                                disabled={selectedFamily.housing_taxes === 0 || selectedFamily.housing_taxes === null}
+                            >
+                                {selectedFamily.housing_taxes === 0 ? 'PAID' : 'PAY'}
+                            </button>
+                        </div>
+
+                        <div>
+                            <h4>Maintenance</h4>
+                            <p>
+                                ${(selectedFamily.housing_maintenance || 0).toFixed(2)}
+                            </p>
+                            <input
+                                type="number"
+                                value={maintenancePayment}
+                                onChange={(e) => setMaintenancePayment(e.target.value)}
+                                disabled={selectedFamily.housing_maintenance === 0 || selectedFamily.housing_maintenance === null}
+                            />
+                            <button
+                                onClick={() => handlePayment('maintenance')}
+                                disabled={selectedFamily.housing_maintenance === 0 || selectedFamily.housing_maintenance === null}
+                            >
+                                {selectedFamily.housing_maintenance === 0 ? 'PAID' : 'PAY'}
                             </button>
                         </div>
                     </div>
