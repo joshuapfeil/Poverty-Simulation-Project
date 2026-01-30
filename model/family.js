@@ -109,6 +109,24 @@ async function edit(parameters = {}) {
         queryParameters.push(body.utilities_phone);
     }
 
+    // Food weeks paid
+    if (typeof body.food_week1_paid !== 'undefined' && body.food_week1_paid !== null && body.food_week1_paid !== '') {
+        sets.push('food_week1_paid = ?');
+        queryParameters.push(body.food_week1_paid);
+    }
+    if (typeof body.food_week2_paid !== 'undefined' && body.food_week2_paid !== null && body.food_week2_paid !== '') {
+        sets.push('food_week2_paid = ?');
+        queryParameters.push(body.food_week2_paid);
+    }
+    if (typeof body.food_week3_paid !== 'undefined' && body.food_week3_paid !== null && body.food_week3_paid !== '') {
+        sets.push('food_week3_paid = ?');
+        queryParameters.push(body.food_week3_paid);
+    }
+    if (typeof body.food_week4_paid !== 'undefined' && body.food_week4_paid !== null && body.food_week4_paid !== '') {
+        sets.push('food_week4_paid = ?');
+        queryParameters.push(body.food_week4_paid);
+    }
+
     // Other bills
     if (typeof body.student_loans !== 'undefined' && body.student_loans !== null && body.student_loans !== '') {
         sets.push('student_loans = ?');
@@ -129,6 +147,18 @@ async function edit(parameters = {}) {
     if (typeof body.automobile_loan !== 'undefined' && body.automobile_loan !== null && body.automobile_loan !== '') {
         sets.push('automobile_loan = ?');
         queryParameters.push(body.automobile_loan);
+    }
+
+    // Misc expenses
+    if (typeof body.misc !== 'undefined' && body.misc !== null && body.misc !== '') {
+        sets.push('misc = ?');
+        queryParameters.push(body.misc);
+    }
+
+    // Prescriptions
+    if (typeof body.prescriptions !== 'undefined' && body.prescriptions !== null && body.prescriptions !== '') {
+        sets.push('prescriptions = ?');
+        queryParameters.push(body.prescriptions);
     }
 
     if (sets.length === 0) return;
