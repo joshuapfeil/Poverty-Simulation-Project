@@ -25,6 +25,10 @@ function query(sql, params) {
                     id INTEGER PRIMARY KEY,
                     name TEXT,
                     bank_total REAL DEFAULT 0,
+                    food_week1_paid REAL DEFAULT 0,
+                    food_week2_paid REAL DEFAULT 0,
+                    food_week3_paid REAL DEFAULT 0,
+                    food_week4_paid REAL DEFAULT 0,
                     monthly_bills REAL DEFAULT 0,
                     housing_mortgage REAL DEFAULT 0,
                     housing_taxes REAL DEFAULT 0,
@@ -46,6 +50,10 @@ function query(sql, params) {
                     const names = cols.map(c => c.name);
                     const columnsToAdd = [
                         'monthly_bills',
+                        'food_week1_paid',
+                        'food_week2_paid',
+                        'food_week3_paid',
+                        'food_week4_paid',
                         'housing_mortgage',
                         'housing_taxes',
                         'housing_maintenance',
@@ -72,11 +80,15 @@ function query(sql, params) {
             db.run(
                 `CREATE TABLE IF NOT EXISTS people (
                     id INTEGER PRIMARY KEY,
-                    name TEXT,
+                    first_name TEXT,
+                    last_name TEXT,
                     family_id INTEGER,
-                    age INTEGER,
-                    is_working INTEGER DEFAULT 0,
-                    medical_needs TEXT,
+                    Week1Pay INTEGER DEFAULT 0,
+                    Week2Pay INTEGER DEFAULT 0,
+                    Week3Pay INTEGER DEFAULT 0,
+                    Week4Pay INTEGER DEFAULT 0,
+                    OnlineJob BOOLEAN DEFAULT 0,
+                    Fired BOOLEAN DEFAULT 0,
                     FOREIGN KEY(family_id) REFERENCES families(id) ON DELETE CASCADE
                 );`
             );
