@@ -87,7 +87,7 @@ function query(sql, params) {
                     Week2Pay INTEGER DEFAULT 0,
                     Week3Pay INTEGER DEFAULT 0,
                     Week4Pay INTEGER DEFAULT 0,
-                    OnlineJob BOOLEAN DEFAULT 0,
+                    OnLeave BOOLEAN DEFAULT 0,
                     Fired BOOLEAN DEFAULT 0,
                     FOREIGN KEY(family_id) REFERENCES families(id) ON DELETE CASCADE
                 );`
