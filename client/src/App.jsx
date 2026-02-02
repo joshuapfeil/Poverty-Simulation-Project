@@ -58,6 +58,7 @@ export default function App() {
       <Route path="/admin" element={<FamiliesAdmin />} />
       <Route path="/login" element={<Login />} />
       <Route path="/family" element={<FamilyView />} />
+      <Route path="/family/:id" element={<FamilyView />} />
       <Route path="/community" element={<CommunityView />} />
       <Route path="/utility" element={<Utility />} />
       <Route path="/bank" element={<Bank />} />

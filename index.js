@@ -100,6 +100,17 @@ app.delete('/families/:id', async (request, response) => {
     }
 });
 
+// search family by name (for login)
+app.get('/families/search/:name', async (request, response) => {
+    try {
+        const results = await families.getByName(request.params.name);
+        return response.status(200).json({ data: results });
+    } catch (error) {
+        console.error(error);
+        return response.status(500).json({ message: 'Failed to search family' });
+    }
+});
+
 
 // --- People API ---
 // get all people (optionally filtered by family_id)
