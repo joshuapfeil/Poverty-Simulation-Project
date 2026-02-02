@@ -6,7 +6,7 @@
   */
 
 import React, { useEffect, useState, } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 
 function useQuery() {
   return new URLSearchParams(useLocation().search)
@@ -14,7 +14,9 @@ function useQuery() {
 
 export default function FamilyView() {
   const query = useQuery()
-  const id = query.get('id')
+  const { id: paramId } = useParams()
+  const queryId = query.get('id')
+  const id = paramId || queryId
   const [family, setFamily] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)

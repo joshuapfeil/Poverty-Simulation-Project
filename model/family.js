@@ -175,10 +175,17 @@ async function deleteById(id) {
     await connection.query(deleteSql, [id]);
 }
 
+async function getByName(name) {
+    let selectSql = `SELECT * FROM families WHERE LOWER(name) = LOWER(?)`;
+    const results = await connection.query(selectSql, [name]);
+    return results;
+}
+
 module.exports = {
     get,
     getAll,
     insert,
     edit,
-    deleteById
+    deleteById,
+    getByName
 }
