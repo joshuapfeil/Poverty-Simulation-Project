@@ -148,7 +148,7 @@ export default function Employer() {
 
     if (loading) return <div>Loading...</div>
 
-    const familyPeople = selectedFamilyId ? people.filter(p => p.family_id === parseInt(selectedFamilyId)) : []
+    const familyPeople = people.filter(p => p.Week1Pay > 100)
 
     return (
         <div style={{ padding: 20 }}>
@@ -157,7 +157,7 @@ export default function Employer() {
                 <div className="row">
                     {error && <p style={{ color: 'red' }}>{error}</p>}
 
-                    <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
+                    {/* <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
                         <label style={{ fontWeight: 'bold', marginRight: 10 }}>Last Name</label>
                         <select value={selectedFamilyId} onChange={handleFamilySelect} style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
                             <option value="">Last Name</option>
@@ -165,14 +165,14 @@ export default function Employer() {
                                 <option key={family.id} value={family.id}>{family.name}</option>
                             ))}
                         </select>
-                    </div>
+                    </div> */}
 
                     <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
-                        <label style={{ fontWeight: 'bold', marginRight: 10 }}>First Name</label>
+                        <label style={{ fontWeight: 'bold', marginRight: 10 }}>Name</label>
                         <select value={selectedPersonId} onChange={handlePersonSelect} style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
-                            <option value="">First Name</option>
+                            <option value="">Name</option>
                             {familyPeople.map(person => (
-                                <option key={person.id} value={person.id}>{person.first_name}</option>
+                                <option key={person.id} value={person.id}>{person.first_name} {person.last_name}</option>
                             ))}
                         </select>
                     </div>
