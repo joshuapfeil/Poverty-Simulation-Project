@@ -14,7 +14,7 @@ export default function Login() {
   // Map of special usernames to their respective routes
   const specialUsers = {
     'gimmroot_a': '/admin',
-    'Healthcare': '/healthcare',
+    'comhealth5': '/healthcare',
     'employgen4': '/employer',
     'utilcom2': '/utility',
     'swynmort6': '/mortgage',
