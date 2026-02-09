@@ -85,13 +85,14 @@ export default function Login() {
         </form>
       </div>
 
-      <hr></hr>
+      {/* <hr></hr>
       <p>Dev buttons:</p>
       <div style={{ display: 'flex', gap: 8 }}>
         <Link to="/family"><button>Family</button></Link>
         <Link to="/community"><button>Community</button></Link>
         <Link to="/admin"><button>Admin</button></Link>
-      </div>
+      </div> */}
+    
     </div>
   )
 }
