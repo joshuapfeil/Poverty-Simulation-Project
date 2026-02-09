@@ -88,45 +88,32 @@ export default function SuperCenter() {
             return
         }
 
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-        if (amount > currentBalance) {
-            setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
-            return
-        }
-
         try {
-            // Build the update object
-            const updateData = {
-                ...selectedFamily,
-                bank_total: currentBalance - amount
+            // Build request body
+            const body = {
+                family_id: selectedFamily.id,
+                bill_type: billType === 'misc' ? 'quikCash' : billType,
+                amount: amount
             }
 
-            // Update specific fields based on bill type
+            // Add week parameter for food payments
             if (billType === 'food') {
-                // Set the specific week as paid
-                const weekField = `food_week${selectedWeek}_paid`
-                updateData[weekField] = 1
-            } else if (billType === 'clothing') {
-                updateData.clothing = 0
-            } else if (billType === 'misc') {
-                updateData.misc = 0
-            } else if (billType === 'prescriptions') {
-                updateData.prescriptions = 0
+                body.week = Number(selectedWeek)
             }
 
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/pay-bill', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updateData)
+                body: JSON.stringify(body)
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
 
             if (billType === 'food') setFoodPayment(updatedFamily?.food_weekly || 0)

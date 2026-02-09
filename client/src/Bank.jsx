@@ -78,69 +78,40 @@ export default function Bank() {
             return
         }
 
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-
-        // Validation: Check for overdraft (except deposits)
-        if (billType !== 'deposit') {
-            if (amount > currentBalance) {
-                setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
-        // Validation: Check for overpayment on loans/credit card
-        if (billType === 'autoLoan') {
-            const currentLoan = Number(selectedFamily.automobile_loan || 0)
-            if (amount > currentLoan) {
-                setError(`Cannot pay more than amount owed. Owed: $${currentLoan.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
-        if (billType === 'studentLoan') {
-            const currentLoan = Number(selectedFamily.student_loans || 0)
-            if (amount > currentLoan) {
-                setError(`Cannot pay more than amount owed. Owed: $${currentLoan.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
-        if (billType === 'creditCard') {
-            const currentBalance = Number(selectedFamily.credit_card || 0)
-            if (amount > currentBalance) {
-                setError(`Cannot pay more than amount owed. Owed: $${currentBalance.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
         try {
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            let endpoint = '';
+            let body = {};
+
+            if (billType === 'deposit') {
+                endpoint = '/api/transactions/deposit';
+                body = { family_id: selectedFamily.id, amount: amount };
+            } else if (billType === 'withdraw') {
+                endpoint = '/api/transactions/withdraw';
+                body = { family_id: selectedFamily.id, amount: amount };
+            } else if (billType === 'autoLoan') {
+                endpoint = '/api/transactions/pay-bill';
+                body = { family_id: selectedFamily.id, bill_type: 'autoLoan', amount: amount };
+            } else if (billType === 'studentLoan') {
+                endpoint = '/api/transactions/pay-bill';
+                body = { family_id: selectedFamily.id, bill_type: 'studentLoan', amount: amount };
+            } else if (billType === 'creditCard') {
+                endpoint = '/api/transactions/pay-bill';
+                body = { family_id: selectedFamily.id, bill_type: 'creditCard', amount: amount };
+            }
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...selectedFamily,
-                    bank_total: billType === 'deposit' 
-                        ? currentBalance + amount 
-                        : currentBalance - amount,
-                    automobile_loan: billType === 'autoLoan' 
-                        ? Math.max(0, selectedFamily.automobile_loan - amount) 
-                        : selectedFamily.automobile_loan,
-                    student_loans: billType === 'studentLoan' 
-                        ? Math.max(0, selectedFamily.student_loans - amount) 
-                        : selectedFamily.student_loans,
-                    credit_card: billType === 'creditCard'
-                        ? Math.max(0, selectedFamily.credit_card - amount)
-                        : selectedFamily.credit_card
-                })
+                body: JSON.stringify(body)
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
 
             // Update payment input fields with remaining balances

@@ -64,33 +64,31 @@ export default function HealthCare() {
         }
 
         const amount = Number(selectedInsurance)
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-        if (amount > currentBalance) {
-            setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
+
+        if (!amount || amount <= 0) {
+            setError('Please enter a valid amount')
             return
         }
 
         setProcessing(true)
         try {
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/withdraw', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...selectedFamily,
-                    bank_total: currentBalance - amount,
-
+                    family_id: selectedFamily.id,
+                    amount: amount
                 })
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
-
 
             setError(null)
         } catch (err) {

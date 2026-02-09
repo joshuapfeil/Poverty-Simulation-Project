@@ -13,6 +13,7 @@ const { check, validationResult } = require('express-validator');
 const cors = require('cors');
 const families = require('./model/family');
 const people = require('./model/person');
+const transactions = require('./model/transactions');
 
 const app = express();
 app.use(cors());
@@ -172,6 +173,83 @@ app.delete('/people/:id', async (request, response) => {
     } catch (error) {
         console.error(error);
         return response.status(500).json({ message: 'Failed to delete person' });
+    }
+});
+
+
+// --- Transactions API ---
+// Deposit funds
+app.post('/api/transactions/deposit', async (request, response) => {
+    try {
+        const { family_id, amount } = request.body;
+        if (!family_id || amount == null) {
+            return response.status(400).json({ message: 'family_id and amount required' });
+        }
+        const updatedFamily = await transactions.deposit(family_id, Number(amount));
+        return response.status(200).json({ data: updatedFamily });
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json({ message: error.message });
+    }
+});
+
+// Withdraw funds
+app.post('/api/transactions/withdraw', async (request, response) => {
+    try {
+        const { family_id, amount } = request.body;
+        if (!family_id || amount == null) {
+            return response.status(400).json({ message: 'family_id and amount required' });
+        }
+        const updatedFamily = await transactions.withdraw(family_id, Number(amount));
+        return response.status(200).json({ data: updatedFamily });
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json({ message: error.message });
+    }
+});
+
+// Pay employee
+app.post('/api/transactions/pay-employee', async (request, response) => {
+    try {
+        const { family_id, person_id, week, amount } = request.body;
+        if (!family_id || !person_id || !week || amount == null) {
+            return response.status(400).json({ message: 'family_id, person_id, week, and amount required' });
+        }
+        const result = await transactions.payEmployee(family_id, person_id, Number(week), Number(amount));
+        return response.status(200).json({ data: result });
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json({ message: error.message });
+    }
+});
+
+// Pay bill (utilities, loans, credit card)
+app.post('/api/transactions/pay-bill', async (request, response) => {
+    try {
+        const { family_id, bill_type, amount, week } = request.body;
+        if (!family_id || !bill_type || amount == null) {
+            return response.status(400).json({ message: 'family_id, bill_type, and amount required' });
+        }
+        const updatedFamily = await transactions.payBill(family_id, bill_type, Number(amount), week ? Number(week) : null);
+        return response.status(200).json({ data: updatedFamily });
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json({ message: error.message });
+    }
+});
+
+// Set person status (on leave, fired)
+app.post('/api/transactions/set-status', async (request, response) => {
+    try {
+        const { person_id, status, value } = request.body;
+        if (!person_id || !status) {
+            return response.status(400).json({ message: 'person_id and status required' });
+        }
+        const updatedPerson = await transactions.setPersonStatus(person_id, status, value);
+        return response.status(200).json({ data: updatedPerson });
+    } catch (error) {
+        console.error(error);
+        return response.status(400).json({ message: error.message });
     }
 });
 

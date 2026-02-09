@@ -74,32 +74,24 @@ export default function Mortgage() {
             return
         }
 
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-        if (amount > currentBalance) {
-            setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
-            return
-        }
-
         try {
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/pay-bill', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...selectedFamily,
-                    bank_total: currentBalance - amount,
-                    housing_mortgage: billType === 'mortgage' ? Math.max(0, selectedFamily.housing_mortgage - amount) : selectedFamily.housing_mortgage,
-                    housing_taxes: billType === 'taxes' ? Math.max(0, selectedFamily.housing_taxes - amount) : selectedFamily.housing_taxes,
-                    housing_maintenance: billType === 'maintenance' ? Math.max(0, selectedFamily.housing_maintenance - amount) : selectedFamily.housing_maintenance
+                    family_id: selectedFamily.id,
+                    bill_type: billType,
+                    amount: amount
                 })
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
 
             if (billType === 'mortgage') setMortgagePayment('')
