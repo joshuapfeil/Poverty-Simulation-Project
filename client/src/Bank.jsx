@@ -1,4 +1,4 @@
-//The bank is in charge of depositing checks and cash, withdrawing money, collecting loan amounts due, and converting TANF benefits.
+//The bank is in charge of depositing checks and cash, withdrawing money, collecting loan amounts due, and credit card payments.
 
 import React, { useEffect, useState } from 'react'
 
@@ -6,11 +6,11 @@ export default function Bank() {
     const [families, setFamilies] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
-    const [currentBalance, setBalance] = useState('')
     const [depositAmount, setDepositAmount] = useState('')
     const [withdrawAmount, setWithdrawAmount] = useState('')
     const [autoLoanPayment, setAutoLoanPayment] = useState('')
     const [studentLoanPayment, setStudentLoanPayment] = useState('')
+    const [creditCardPayment, setCreditCardPayment] = useState('')
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
@@ -41,7 +41,7 @@ export default function Bank() {
         return () => clearInterval(interval)
     }, [selectedFamilyId])
 
-    // When a family is selected, populate the utility amounts
+    // When a family is selected, populate the amounts
     const handleFamilySelect = (e) => {
         const familyId = e.target.value
         setSelectedFamilyId(familyId)
@@ -49,15 +49,14 @@ export default function Bank() {
         if (familyId) {
             const family = families.find(f => f.id === parseInt(familyId))
             setSelectedFamily(family)
-            setBalance(family?.bank_total || 0)
             setAutoLoanPayment(family?.automobile_loan || 0)
             setStudentLoanPayment(family?.student_loans || 0)
-
+            setCreditCardPayment(family?.credit_card || 0)
         } else {
             setSelectedFamily(null)
-            setBalance('')
             setAutoLoanPayment('')
             setStudentLoanPayment('')
+            setCreditCardPayment('')
         }
     }
 
@@ -66,10 +65,13 @@ export default function Bank() {
             setError('Please select a family')
             return
         }
+
         const amount = billType === 'deposit' ? Number(depositAmount) :
                     billType === 'withdraw' ? Number(withdrawAmount) :
                     billType === 'autoLoan' ? Number(autoLoanPayment) :
-                    Number(studentLoanPayment)
+                    billType === 'studentLoan' ? Number(studentLoanPayment) :
+                    billType === 'creditCard' ? Number(creditCardPayment) :
+                    0
 
         if (!amount || amount <= 0) {
             setError('Please enter a valid amount')
@@ -78,15 +80,57 @@ export default function Bank() {
 
         const currentBalance = Number(selectedFamily.bank_total || 0)
 
+        // Validation: Check for overdraft (except deposits)
+        if (billType !== 'deposit') {
+            if (amount > currentBalance) {
+                setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
+                return
+            }
+        }
+
+        // Validation: Check for overpayment on loans/credit card
+        if (billType === 'autoLoan') {
+            const currentLoan = Number(selectedFamily.automobile_loan || 0)
+            if (amount > currentLoan) {
+                setError(`Cannot pay more than amount owed. Owed: $${currentLoan.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
+                return
+            }
+        }
+
+        if (billType === 'studentLoan') {
+            const currentLoan = Number(selectedFamily.student_loans || 0)
+            if (amount > currentLoan) {
+                setError(`Cannot pay more than amount owed. Owed: $${currentLoan.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
+                return
+            }
+        }
+
+        if (billType === 'creditCard') {
+            const currentBalance = Number(selectedFamily.credit_card || 0)
+            if (amount > currentBalance) {
+                setError(`Cannot pay more than amount owed. Owed: $${currentBalance.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
+                return
+            }
+        }
+
         try {
             const res = await fetch(`/families/${selectedFamily.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...selectedFamily,
-                    bank_total: billType === 'deposit' ? currentBalance + amount : billType === 'withdraw' ? currentBalance - amount : billType === 'autoLoan' ? currentBalance - amount : billType === 'studentLoan' ? currentBalance - amount : currentBalance,
-                    automobile_loan: billType === 'autoLoan' ? Math.max(0, selectedFamily.automobile_loan - amount) : selectedFamily.automobile_loan,
-                    student_loans: billType === 'studentLoan' ? Math.max(0, selectedFamily.student_loans - amount) : selectedFamily.student_loans
+                    bank_total: billType === 'deposit' 
+                        ? currentBalance + amount 
+                        : currentBalance - amount,
+                    automobile_loan: billType === 'autoLoan' 
+                        ? Math.max(0, selectedFamily.automobile_loan - amount) 
+                        : selectedFamily.automobile_loan,
+                    student_loans: billType === 'studentLoan' 
+                        ? Math.max(0, selectedFamily.student_loans - amount) 
+                        : selectedFamily.student_loans,
+                    credit_card: billType === 'creditCard'
+                        ? Math.max(0, selectedFamily.credit_card - amount)
+                        : selectedFamily.credit_card
                 })
             })
 
@@ -98,15 +142,15 @@ export default function Bank() {
             const json = await res.json()
             const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
             setSelectedFamily(updatedFamily)
-            setBalance(updatedFamily?.bank_total || 0)
+
+            // Update payment input fields with remaining balances
             setAutoLoanPayment(updatedFamily?.automobile_loan || 0)
             setStudentLoanPayment(updatedFamily?.student_loans || 0)
+            setCreditCardPayment(updatedFamily?.credit_card || 0)
 
-            // Clear inputs
+            // Clear deposit and withdraw inputs
             if (billType === 'deposit') setDepositAmount('')
             if (billType === 'withdraw') setWithdrawAmount('')
-            if (billType === 'autoLoan') setAutoLoanPayment('')
-            if (billType === 'studentLoan') setStudentLoanPayment('')
 
             setError(null)
         } catch (err) {
@@ -115,12 +159,11 @@ export default function Bank() {
     }
 
     if (loading) {
-        return <div style={{ padding: 20 }}>Loading Utilities...</div>
+        return <div style={{ padding: 20 }}>Loading Bank...</div>
     }
 
-
     return (
-        <div style={{ padding: 20 }} className='containter'>
+        <div style={{ padding: 20 }} className='container'>
             <h1>U Trust US National Bank</h1>
 
             {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -141,7 +184,6 @@ export default function Bank() {
                 </select>
             </div>
 
-
             {selectedFamily && (
                 <div>
                     <h2>{selectedFamily.name}</h2>
@@ -154,10 +196,9 @@ export default function Bank() {
                                 type="number"
                                 value={depositAmount}
                                 onChange={(e) => setDepositAmount(e.target.value)}
+                                placeholder="Enter amount"
                             />
-
                             <button onClick={() => handlePayment('deposit')}>Deposit</button>
-
                         </div>
 
                         <div>
@@ -166,37 +207,75 @@ export default function Bank() {
                                 type="number"
                                 value={withdrawAmount}
                                 onChange={(e) => setWithdrawAmount(e.target.value)}
+                                placeholder="Enter amount"
                             />
-
                             <button onClick={() => handlePayment('withdraw')}>Withdraw</button>
                         </div>
 
                         <div>
                             <h4>Auto Loan Payment</h4>
-                            <p>
-                                ${(selectedFamily.automobile_loan || 0).toFixed(2)}
-                            </p>
+                            <p>Amount Owed: ${(selectedFamily.automobile_loan || 0).toFixed(2)}</p>
                             <input
                                 type="number"
                                 value={autoLoanPayment}
                                 onChange={(e) => setAutoLoanPayment(e.target.value)}
+                                disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
+                                style={{
+                                    backgroundColor: (selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null) 
+                                        ? '#e0e0e0' 
+                                        : 'white'
+                                }}
                             />
-
-                            <button onClick={() => handlePayment('autoLoan')}>Pay Auto Loan</button>
+                            <button 
+                                onClick={() => handlePayment('autoLoan')}
+                                disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
+                            >
+                                {selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null ? 'PAID' : 'Pay Auto Loan'}
+                            </button>
                         </div>
 
                         <div>
                             <h4>Student Loan Payment</h4>
-                            <p>
-                                ${(selectedFamily.student_loans || 0).toFixed(2)}
-                            </p>
+                            <p>Amount Owed: ${(selectedFamily.student_loans || 0).toFixed(2)}</p>
                             <input
                                 type="number"
                                 value={studentLoanPayment}
                                 onChange={(e) => setStudentLoanPayment(e.target.value)}
+                                disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
+                                style={{
+                                    backgroundColor: (selectedFamily.student_loans === 0 || selectedFamily.student_loans === null) 
+                                        ? '#e0e0e0' 
+                                        : 'white'
+                                }}
                             />
+                            <button 
+                                onClick={() => handlePayment('studentLoan')}
+                                disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
+                            >
+                                {selectedFamily.student_loans === 0 || selectedFamily.student_loans === null ? 'PAID' : 'Pay Student Loan'}
+                            </button>
+                        </div>
 
-                            <button onClick={() => handlePayment('studentLoan')}>Pay Student Loan</button>
+                        <div>
+                            <h4>Credit Card Payment</h4>
+                            <p>Amount Owed: ${(selectedFamily.credit_card || 0).toFixed(2)}</p>
+                            <input
+                                type="number"
+                                value={creditCardPayment}
+                                onChange={(e) => setCreditCardPayment(e.target.value)}
+                                disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
+                                style={{
+                                    backgroundColor: (selectedFamily.credit_card === 0 || selectedFamily.credit_card === null) 
+                                        ? '#e0e0e0' 
+                                        : 'white'
+                                }}
+                            />
+                            <button 
+                                onClick={() => handlePayment('creditCard')}
+                                disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
+                            >
+                                {selectedFamily.credit_card === 0 || selectedFamily.credit_card === null ? 'PAID' : 'Pay Credit Card'}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -204,4 +283,3 @@ export default function Bank() {
         </div>
     )
 }
-

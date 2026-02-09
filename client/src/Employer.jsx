@@ -22,10 +22,6 @@ export default function Employer() {
                 if (!res.ok) throw new Error(`Families fetch failed (${res.status})`)
                 const j = await res.json()
                 setFamilies(j.data || [])
-                if (selectedFamilyId) {
-                    const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
-                    if (updated) setSelectedFamily(updated)
-                }
                 setError(null)
             } catch (e) {
                 setError(e.message)
@@ -35,7 +31,7 @@ export default function Employer() {
         }
 
         fetchFamilies()
-    }, [selectedFamilyId])
+    }, [])
 
     useEffect(() => {
         const fetchPeople = async () => {
@@ -52,16 +48,6 @@ export default function Employer() {
         fetchPeople()
     }, [])
 
-    const handleFamilySelect = (e) => {
-        const id = e.target.value
-        setSelectedFamilyId(id)
-        if (!id) {
-            setSelectedFamily(null)
-            setSelectedPersonId('')
-            setSelectedPerson(null)
-        }
-    }
-
     const handlePersonSelect = (e) => {
         const id = e.target.value
         setSelectedPersonId(id)
@@ -69,32 +55,62 @@ export default function Employer() {
         setSelectedPerson(p || null)
         setOnLeaveChecked(p?.on_leave ?? false)
         setFiredChecked(p?.fired ?? false)
+
+        // Auto-select family based on person's last_name
+        if (p) {
+            const family = families.find(f => f.name === p.last_name)
+            if (family) {
+                setSelectedFamilyId(family.id.toString())
+                setSelectedFamily(family)
+            } else {
+                setSelectedFamilyId('')
+                setSelectedFamily(null)
+            }
+        } else {
+            setSelectedFamilyId('')
+            setSelectedFamily(null)
+        }
     }
 
     const handleWeekSelect = (e) => setSelectedWeek(e.target.value)
 
     const getWeekPay = (person, week) => {
         if (!person) return 0
-        const keys = [`week${week}Pay`, `Week${week}Pay`, `week_${week}_pay`]
+        const keys = [`Week${week}Pay`, `week${week}Pay`, `week_${week}_pay`]
         for (const k of keys) {
             if (k in person && person[k] != null) return Number(person[k]) || 0
         }
         return 0
     }
 
+    const isWeekPaid = (person, week) => {
+        if (!person) return false
+        const paidField = `week${week}_paid`
+        return person[paidField] === 1
+    }
 
     const handleOnLeaveChange = async (e) => {
         const checked = e.target.checked
         setOnLeaveChecked(checked)
         if (!selectedPerson) return
+
         try {
             const res = await fetch(`/people/${selectedPerson.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ on_leave: checked ? 1 : 0 })
+                body: JSON.stringify({
+                    ...selectedPerson,
+                    on_leave: checked ? 1 : 0
+                })
             })
             if (!res.ok) throw new Error('Update failed')
-            setSelectedPerson({ ...selectedPerson, on_leave: checked ? 1 : 0 })
+
+            const updatedPerson = { ...selectedPerson, on_leave: checked ? 1 : 0 }
+            setSelectedPerson(updatedPerson)
+
+            // Update in people array
+            setPeople(people.map(p => p.id === updatedPerson.id ? updatedPerson : p))
+            setError(null)
         } catch (e) {
             setError(e.message)
         }
@@ -104,14 +120,24 @@ export default function Employer() {
         const checked = e.target.checked
         setFiredChecked(checked)
         if (!selectedPerson) return
+
         try {
             const res = await fetch(`/people/${selectedPerson.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fired: checked ? 1 : 0 })
+                body: JSON.stringify({
+                    ...selectedPerson,
+                    fired: checked ? 1 : 0
+                })
             })
             if (!res.ok) throw new Error('Update failed')
-            setSelectedPerson({ ...selectedPerson, fired: checked ? 1 : 0 })
+
+            const updatedPerson = { ...selectedPerson, fired: checked ? 1 : 0 }
+            setSelectedPerson(updatedPerson)
+
+            // Update in people array
+            setPeople(people.map(p => p.id === updatedPerson.id ? updatedPerson : p))
+            setError(null)
         } catch (e) {
             setError(e.message)
         }
@@ -119,26 +145,73 @@ export default function Employer() {
 
     const handlePayment = async () => {
         setError(null)
-        if (!selectedFamily) { setError('Select a family'); return }
-        if (!selectedPerson) { setError('Select a person'); return }
+        if (!selectedFamily) {
+            setError('Select a family')
+            return
+        }
+        if (!selectedPerson) {
+            setError('Select a person')
+            return
+        }
 
         const fired = selectedPerson.fired ? true : false
         const onLeave = selectedPerson.on_leave ? true : false
-        if (fired) { setError('Cannot deposit - person has been fired'); return }
-        if (onLeave) { setError('Cannot deposit - person is on leave'); return }
+
+        if (fired) {
+            setError('Cannot deposit - person has been fired')
+            return
+        }
+        if (onLeave) {
+            setError('Cannot deposit - person is on leave')
+            return
+        }
+
+        const weekPaid = isWeekPaid(selectedPerson, selectedWeek)
+        if (weekPaid) {
+            setError('This week has already been paid')
+            return
+        }
 
         const amount = getWeekPay(selectedPerson, selectedWeek)
-        if (!amount) { setError('No pay for selected week'); return }
+        if (!amount) {
+            setError('No pay for selected week')
+            return
+        }
 
         setProcessing(true)
         try {
-            const res = await fetch(`/families/${selectedFamily.id}`, {
+            // Update family bank total
+            const familyRes = await fetch(`/families/${selectedFamily.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bank_total: (selectedFamily.bank_total || 0) + amount })
+                body: JSON.stringify({
+                    ...selectedFamily,
+                    bank_total: (selectedFamily.bank_total || 0) + amount
+                })
             })
-            if (!res.ok) throw new Error('Update failed')
-            setSelectedFamily({ ...selectedFamily, bank_total: (selectedFamily.bank_total || 0) + amount })
+            if (!familyRes.ok) throw new Error('Family update failed')
+
+            // Mark week as paid for person
+            const paidField = `week${selectedWeek}_paid`
+            const personRes = await fetch(`/people/${selectedPerson.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...selectedPerson,
+                    [paidField]: 1
+                })
+            })
+            if (!personRes.ok) throw new Error('Person update failed')
+
+            // Update local state
+            const updatedFamily = { ...selectedFamily, bank_total: (selectedFamily.bank_total || 0) + amount }
+            const updatedPerson = { ...selectedPerson, [paidField]: 1 }
+
+            setSelectedFamily(updatedFamily)
+            setSelectedPerson(updatedPerson)
+            setPeople(people.map(p => p.id === updatedPerson.id ? updatedPerson : p))
+
+            setError(null)
         } catch (e) {
             setError(e.message)
         } finally {
@@ -146,9 +219,36 @@ export default function Employer() {
         }
     }
 
-    if (loading) return <div>Loading...</div>
+    if (loading) return <div style={{ padding: 20 }}>Loading...</div>
 
     const familyPeople = people.filter(p => p.Week1Pay > 100)
+
+    // Determine button state and text
+    const getButtonState = () => {
+        if (!selectedPerson) {
+            return { disabled: true, text: 'Paycheck' }
+        }
+
+        if (selectedPerson.fired) {
+            return { disabled: true, text: 'FIRED' }
+        }
+
+        if (selectedPerson.on_leave) {
+            return { disabled: true, text: 'ON LEAVE' }
+        }
+
+        if (isWeekPaid(selectedPerson, selectedWeek)) {
+            return { disabled: true, text: 'PAID' }
+        }
+
+        if (processing) {
+            return { disabled: true, text: 'Processing...' }
+        }
+
+        return { disabled: false, text: 'Paycheck' }
+    }
+
+    const buttonState = getButtonState()
 
     return (
         <div style={{ padding: 20 }}>
@@ -157,29 +257,36 @@ export default function Employer() {
                 <div className="row">
                     {error && <p style={{ color: 'red' }}>{error}</p>}
 
-                    {/* <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
-                        <label style={{ fontWeight: 'bold', marginRight: 10 }}>Last Name</label>
-                        <select value={selectedFamilyId} onChange={handleFamilySelect} style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
-                            <option value="">Last Name</option>
-                            {families.map(family => (
-                                <option key={family.id} value={family.id}>{family.name}</option>
-                            ))}
-                        </select>
-                    </div> */}
-
                     <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
                         <label style={{ fontWeight: 'bold', marginRight: 10 }}>Name</label>
-                        <select value={selectedPersonId} onChange={handlePersonSelect} style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
-                            <option value="">Name</option>
+                        <select
+                            value={selectedPersonId}
+                            onChange={handlePersonSelect}
+                            style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
+                        >
+                            <option value="">-- Select Employee --</option>
                             {familyPeople.map(person => (
-                                <option key={person.id} value={person.id}>{person.first_name} {person.last_name}</option>
+                                <option key={person.id} value={person.id}>
+                                    {person.first_name} {person.last_name}
+                                </option>
                             ))}
                         </select>
                     </div>
 
+                    {selectedPerson && selectedFamily && (
+                        <div style={{ marginBottom: 20 }}>
+                            <p><strong>Family:</strong> {selectedFamily.name}</p>
+                            <p><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+                        </div>
+                    )}
+
                     <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
                         <label style={{ fontWeight: 'bold', marginRight: 10 }}>Week:</label>
-                        <select value={selectedWeek} onChange={handleWeekSelect} style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
+                        <select
+                            value={selectedWeek}
+                            onChange={handleWeekSelect}
+                            style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
+                        >
                             <option value="1">Week 1</option>
                             <option value="2">Week 2</option>
                             <option value="3">Week 3</option>
@@ -187,18 +294,39 @@ export default function Employer() {
                         </select>
                     </div>
 
+                    {selectedPerson && (
+                        <div style={{ marginBottom: 20 }}>
+                            <p><strong>Week {selectedWeek} Pay:</strong> ${getWeekPay(selectedPerson, selectedWeek).toFixed(2)}</p>
+                        </div>
+                    )}
+
                     <div className="col-2">
                         <p>On Leave</p>
-                        <input type="checkbox" checked={onLeaveChecked} onChange={handleOnLeaveChange}></input>
+                        <input
+                            type="checkbox"
+                            checked={onLeaveChecked}
+                            onChange={handleOnLeaveChange}
+                            disabled={!selectedPerson}
+                        />
                     </div>
 
                     <div className="col-2">
                         <p>Fired</p>
-                        <input type="checkbox" checked={firedChecked} onChange={handleFiredChange}></input>
+                        <input
+                            type="checkbox"
+                            checked={firedChecked}
+                            onChange={handleFiredChange}
+                            disabled={!selectedPerson}
+                        />
                     </div>
 
                     <div className="col-2" style={{ marginTop: 30 }}>
-                        <button onClick={handlePayment} disabled={processing}>{processing ? 'Processing...' : 'Paycheck'}</button>
+                        <button
+                            onClick={handlePayment}
+                            disabled={buttonState.disabled}
+                        >
+                            {buttonState.text}
+                        </button>
                     </div>
                 </div>
             </div>
