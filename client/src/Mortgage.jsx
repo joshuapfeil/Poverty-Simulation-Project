@@ -107,11 +107,13 @@ export default function Mortgage() {
                     style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
                 >
                     <option value="">-- Choose a family --</option>
-                    {families.map(family => (
-                        <option key={family.id} value={family.id}>
-                            {family.name}
-                        </option>
-                    ))}
+                    {families
+                        .filter(family => Number(family.housing_mortgage) > 0)
+                        .map(family => (
+                            <option key={family.id} value={family.id}>
+                                {family.name}
+                            </option>
+                        ))}
                 </select>
             </div>
 
