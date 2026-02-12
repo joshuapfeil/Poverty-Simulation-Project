@@ -1,9 +1,9 @@
 //The bank is in charge of depositing checks and cash, withdrawing money, collecting loan amounts due, and credit card payments.
 
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function Bank() {
-    const [families, setFamilies] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
     const [depositAmount, setDepositAmount] = useState('')
@@ -11,35 +11,20 @@ export default function Bank() {
     const [autoLoanPayment, setAutoLoanPayment] = useState('')
     const [studentLoanPayment, setStudentLoanPayment] = useState('')
     const [creditCardPayment, setCreditCardPayment] = useState('')
-    const [loading, setLoading] = useState(true)
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
 
-    // Fetch families on mount
     useEffect(() => {
-        const fetchFamilies = () => {
-            setLoading(true)
-            fetch('/families/')
-                .then((r) => r.json())
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
 
-                //Polling Reload 
-                .then((j) => {
-                    setFamilies(j.data || [])
-                    if (selectedFamilyId) {
-                        const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
-                        if (updated) {
-                            setSelectedFamily(updated)
-                        }
-                    }
-                })
-                .catch((e) => setError(e.message))
-                .finally(() => setLoading(false))
+    // Sync selected family when families update
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
         }
-
-        fetchFamilies()
-
-        const interval = setInterval(fetchFamilies, 10000) // Polling Rate in Milliseconds ie 1000 = 1 second
-        return () => clearInterval(interval)
-    }, [selectedFamilyId])
+    }, [families, selectedFamilyId])
 
     // When a family is selected, populate the amounts
     const handleFamilySelect = (e) => {
@@ -113,6 +98,7 @@ export default function Bank() {
             const json = await res.json()
             const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
+            updateFamily(updatedFamily)
 
             // Update payment input fields with remaining balances
             setAutoLoanPayment(updatedFamily?.automobile_loan || 0)
@@ -129,7 +115,7 @@ export default function Bank() {
         }
     }
 
-    if (loading) {
+    if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading Bank...</div>
     }
 

@@ -1,44 +1,28 @@
 // Mortgage office takes mortgage, tax, and maintenance payments from families
 
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function Mortgage() {
-    const [families, setFamilies] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
     const [mortgagePayment, setMortgagePayment] = useState('')
     const [taxesPayment, setTaxesPayment] = useState('')
     const [maintenancePayment, setMaintenancePayment] = useState('')
-    const [loading, setLoading] = useState(true)
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
 
-    // Fetch families on mount
     useEffect(() => {
-        const fetchFamilies = () => {
-            setLoading(true)
-            fetch('/families/')
-                .then((r) => r.json())
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
 
-                //Polling Reload 
-                .then((j) => {
-                    setFamilies(j.data || [])
-                    // Update selected family if it exists in the new data
-                    if (selectedFamilyId) {
-                        const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
-                        if (updated) {
-                            setSelectedFamily(updated)
-                        }
-                    }
-                })
-                .catch((e) => setError(e.message))
-                .finally(() => setLoading(false))
+    // Keep selectedFamily in sync when families list updates (real-time updates)
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
         }
-
-        fetchFamilies()
-
-        const interval = setInterval(fetchFamilies, 10000) // Polling Rate in Milliseconds ie 1000 = 1 second
-        return () => clearInterval(interval)
-    }, [selectedFamilyId])
+    }, [families, selectedFamilyId])
 
     // When a family is selected, populate the payment amounts
     const handleFamilySelect = (e) => {
@@ -93,6 +77,7 @@ export default function Mortgage() {
             const json = await res.json()
             const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
+            updateFamily(updatedFamily)
 
             if (billType === 'mortgage') setMortgagePayment('')
             if (billType === 'taxes') setTaxesPayment('')
@@ -104,7 +89,7 @@ export default function Mortgage() {
         }
     }
 
-    if (loading) {
+    if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading Mortgage & Realty...</div>
     }
 

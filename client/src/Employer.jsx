@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function Employer() {
-    const [families, setFamilies] = useState([])
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [people, setPeople] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
@@ -10,28 +11,21 @@ export default function Employer() {
     const [selectedWeek, setSelectedWeek] = useState('1')
     const [onLeaveChecked, setOnLeaveChecked] = useState(false)
     const [firedChecked, setFiredChecked] = useState(false)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
     const [processing, setProcessing] = useState(false)
 
-    useEffect(() => {
-        const fetchFamilies = async () => {
-            setLoading(true)
-            try {
-                const res = await fetch('/families/')
-                if (!res.ok) throw new Error(`Families fetch failed (${res.status})`)
-                const j = await res.json()
-                setFamilies(j.data || [])
-                setError(null)
-            } catch (e) {
-                setError(e.message)
-            } finally {
-                setLoading(false)
-            }
-        }
+    const [error, setError] = useState(null)
 
-        fetchFamilies()
-    }, [])
+    useEffect(() => {
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
+
+    // Sync selected family when families list updates (live updates)
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
+        }
+    }, [families, selectedFamilyId])
 
     useEffect(() => {
         const fetchPeople = async () => {
@@ -194,6 +188,7 @@ export default function Employer() {
             setSelectedFamily(updatedFamily)
             setSelectedPerson(updatedPerson)
             setPeople(people.map(p => p.id === updatedPerson.id ? updatedPerson : p))
+            updateFamily(updatedFamily)
 
             setError(null)
         } catch (e) {
@@ -203,7 +198,7 @@ export default function Employer() {
         }
     }
 
-    if (loading) return <div style={{ padding: 20 }}>Loading...</div>
+    if (familiesLoading) return <div style={{ padding: 20 }}>Loading...</div>
 
     const familyPeople = people.filter(p => p.Week1Pay > 100)
 

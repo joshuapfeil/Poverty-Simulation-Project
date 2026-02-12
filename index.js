@@ -26,6 +26,25 @@ const path = require('path');
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Simple in-memory SSE clients registry
+const sseClients = new Set()
+
+async function broadcastFamilies() {
+    try {
+        const all = await families.getAll()
+        const payload = JSON.stringify({ data: all })
+        for (const res of sseClients) {
+            try {
+                res.write(`data: ${payload}\n\n`)
+            } catch (e) {
+                // ignore write errors; client cleanup handled on close
+            }
+        }
+    } catch (e) {
+        console.error('Failed to broadcast families', e)
+    }
+}
+
 // If a built React app exists at client/dist, serve it in production.
 const clientDist = path.join(__dirname, 'client', 'dist');
 if (fs.existsSync(clientDist)) {
@@ -51,6 +70,28 @@ app.get('/families/', async (request, response) => {
     }
 });
 
+// Server-Sent Events endpoint for families updates
+app.get('/families/stream', async (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+    res.flushHeaders && res.flushHeaders()
+
+    // Send initial payload
+    try {
+        const all = await families.getAll()
+        res.write(`data: ${JSON.stringify({ data: all })}\n\n`)
+    } catch (e) {
+        res.write(`data: ${JSON.stringify({ data: [] })}\n\n`)
+    }
+
+    sseClients.add(res)
+
+    req.on('close', () => {
+        sseClients.delete(res)
+    })
+})
+
 // get single family
 app.get('/families/:id', async (request, response) => {
     try {
@@ -68,6 +109,7 @@ app.post('/families/', async (request, response) => {
         const body = request.body;
         await families.insert({ body });
         const all = await families.getAll();
+        await broadcastFamilies();
         return response.status(201).json({ data: all });
     } catch (error) {
         console.error(error);
@@ -82,6 +124,7 @@ app.put('/families/:id', async (request, response) => {
         body.id = request.params.id;
         await families.edit({ body });
         const all = await families.getAll();
+        await broadcastFamilies();
         return response.status(200).json({ data: all });
     } catch (error) {
         console.error(error);
@@ -94,6 +137,7 @@ app.delete('/families/:id', async (request, response) => {
     try {
         await families.deleteById(request.params.id);
         const all = await families.getAll();
+        await broadcastFamilies();
         return response.status(200).json({ data: all });
     } catch (error) {
         console.error(error);
@@ -186,6 +230,7 @@ app.post('/api/transactions/deposit', async (request, response) => {
             return response.status(400).json({ message: 'family_id and amount required' });
         }
         const updatedFamily = await transactions.deposit(family_id, Number(amount));
+        await broadcastFamilies();
         return response.status(200).json({ data: updatedFamily });
     } catch (error) {
         console.error(error);
@@ -201,6 +246,7 @@ app.post('/api/transactions/withdraw', async (request, response) => {
             return response.status(400).json({ message: 'family_id and amount required' });
         }
         const updatedFamily = await transactions.withdraw(family_id, Number(amount));
+        await broadcastFamilies();
         return response.status(200).json({ data: updatedFamily });
     } catch (error) {
         console.error(error);
@@ -216,6 +262,7 @@ app.post('/api/transactions/pay-employee', async (request, response) => {
             return response.status(400).json({ message: 'family_id, person_id, week, and amount required' });
         }
         const result = await transactions.payEmployee(family_id, person_id, Number(week), Number(amount));
+        await broadcastFamilies();
         return response.status(200).json({ data: result });
     } catch (error) {
         console.error(error);
@@ -231,6 +278,7 @@ app.post('/api/transactions/pay-bill', async (request, response) => {
             return response.status(400).json({ message: 'family_id, bill_type, and amount required' });
         }
         const updatedFamily = await transactions.payBill(family_id, bill_type, Number(amount), week ? Number(week) : null);
+        await broadcastFamilies();
         return response.status(200).json({ data: updatedFamily });
     } catch (error) {
         console.error(error);
