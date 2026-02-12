@@ -97,13 +97,13 @@ export default function QuikCash() {
         }
     }
 
-    if (loading) {
+    if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading Bank...</div>
     }
 
     return (
         <div style={{ padding: 20 }} className='container'>
-            <h1>U Trust US National Bank</h1>
+            <h1>QuikCash</h1>
 
             {error && <p style={{ color: 'red' }}>{error}</p>}
 
