@@ -7,9 +7,9 @@
 //Families that don't have prescription, misc., or clothes payments should have nothing return in those columns.
 
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function SuperCenter() {
-    const [families, setFamilies] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
     const [selectedWeek, setSelectedWeek] = useState('1')
@@ -17,35 +17,20 @@ export default function SuperCenter() {
     const [clothingPayment, setClothingPayment] = useState('')
     const [miscPayment, setMiscPayment] = useState('')
     const [prescriptionsPayment, setPrescriptionsPayment] = useState('')
-    const [loading, setLoading] = useState(true)
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
 
-    // Fetch families on mount
     useEffect(() => {
-        const fetchFamilies = () => {
-            setLoading(true)
-            fetch('/families/')
-                .then((r) => r.json())
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
 
-                //Polling Reload 
-                .then((j) => {
-                    setFamilies(j.data || [])
-                    if (selectedFamilyId) {
-                        const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
-                        if (updated) {
-                            setSelectedFamily(updated)
-                        }
-                    }
-                })
-                .catch((e) => setError(e.message))
-                .finally(() => setLoading(false))
+    // Keep selected family in sync with live updates
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
         }
-
-        fetchFamilies()
-
-        const interval = setInterval(fetchFamilies, 10000) // Polling Rate in Milliseconds
-        return () => clearInterval(interval)
-    }, [selectedFamilyId])
+    }, [families, selectedFamilyId])
 
     // When a family is selected, populate the payment amounts
     const handleFamilySelect = (e) => {
@@ -88,46 +73,34 @@ export default function SuperCenter() {
             return
         }
 
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-        if (amount > currentBalance) {
-            setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
-            return
-        }
-
         try {
-            // Build the update object
-            const updateData = {
-                ...selectedFamily,
-                bank_total: currentBalance - amount
+            // Build request body
+            const body = {
+                family_id: selectedFamily.id,
+                bill_type: billType === 'misc' ? 'quikCash' : billType,
+                amount: amount
             }
 
-            // Update specific fields based on bill type
+            // Add week parameter for food payments
             if (billType === 'food') {
-                // Set the specific week as paid
-                const weekField = `food_week${selectedWeek}_paid`
-                updateData[weekField] = 1
-            } else if (billType === 'clothing') {
-                updateData.clothing = 0
-            } else if (billType === 'misc') {
-                updateData.misc = 0
-            } else if (billType === 'prescriptions') {
-                updateData.prescriptions = 0
+                body.week = Number(selectedWeek)
             }
 
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/pay-bill', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updateData)
+                body: JSON.stringify(body)
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
+            updateFamily(updatedFamily)
 
             if (billType === 'food') setFoodPayment(updatedFamily?.food_weekly || 0)
             if (billType === 'clothing') setClothingPayment('')
@@ -140,7 +113,7 @@ export default function SuperCenter() {
         }
     }
 
-    if (loading) {
+    if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading SuperCenter...</div>
     }
 

@@ -8,7 +8,8 @@
   The way it looks def needs some work
 */
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+import useFamilies from './useFamilies'
 import { Routes, Route, Link } from 'react-router-dom'
 import FamiliesAdmin from './FamiliesAdmin'
 import Login from './Login'
@@ -24,20 +25,9 @@ import Healthcare from './Healthcare'
 import BannerImage from './images/povsim.png'
 
 function Home() {
-  const [families, setFamilies] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    fetch('/families/')
-      .then((res) => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      })
-      .then((data) => setFamilies(data.data || []))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
+  useFamilies()
+  // Home currently doesn't render the family list; using the hook keeps data fresh for other pages
+  
 
   //this return is where the changes to the home page are made
   return (

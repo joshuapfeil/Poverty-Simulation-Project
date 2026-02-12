@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState, } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
+import useFamilies from './useFamilies'
 
 function useQuery() {
   return new URLSearchParams(useLocation().search)
@@ -20,6 +21,8 @@ export default function FamilyView() {
   const [family, setFamily] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+
+  const { families, loading: familiesLoading, error: familiesError } = useFamilies()
 
   const [foodWeeks, setFoodWeeks] = useState([false, false, false, false, false])
 
@@ -36,15 +39,16 @@ export default function FamilyView() {
     setFoodWeeks(weeks)
   }, [family])
 
+  // Sync family from shared families list (keeps view live)
   useEffect(() => {
+    if (familiesError) setError(familiesError)
+    setLoading(familiesLoading)
     if (!id) return
-    setLoading(true)
-    fetch(`/families/${id}`)
-        .then((r) => r.json())
-        .then((j) => setFamily((j.data && j.data[0]) || null))
-        .catch((e) => setError(e.message))
-        .finally(() => setLoading(false))
-  }, [id])
+    if (!familiesLoading) {
+      const found = families.find(f => f.id === parseInt(id))
+      setFamily(found || null)
+    }
+  }, [id, families, familiesLoading, familiesError])
 
   // Calculate total monthly bills
   const calculateMonthlyBills = () => {

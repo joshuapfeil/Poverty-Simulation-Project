@@ -1,9 +1,9 @@
 //The bank is in charge of depositing checks and cash, withdrawing money, collecting loan amounts due, and credit card payments.
 
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function Bank() {
-    const [families, setFamilies] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
     const [depositAmount, setDepositAmount] = useState('')
@@ -11,35 +11,20 @@ export default function Bank() {
     const [autoLoanPayment, setAutoLoanPayment] = useState('')
     const [studentLoanPayment, setStudentLoanPayment] = useState('')
     const [creditCardPayment, setCreditCardPayment] = useState('')
-    const [loading, setLoading] = useState(true)
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
 
-    // Fetch families on mount
     useEffect(() => {
-        const fetchFamilies = () => {
-            setLoading(true)
-            fetch('/families/')
-                .then((r) => r.json())
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
 
-                //Polling Reload 
-                .then((j) => {
-                    setFamilies(j.data || [])
-                    if (selectedFamilyId) {
-                        const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
-                        if (updated) {
-                            setSelectedFamily(updated)
-                        }
-                    }
-                })
-                .catch((e) => setError(e.message))
-                .finally(() => setLoading(false))
+    // Sync selected family when families update
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
         }
-
-        fetchFamilies()
-
-        const interval = setInterval(fetchFamilies, 10000) // Polling Rate in Milliseconds ie 1000 = 1 second
-        return () => clearInterval(interval)
-    }, [selectedFamilyId])
+    }, [families, selectedFamilyId])
 
     // When a family is selected, populate the amounts
     const handleFamilySelect = (e) => {
@@ -78,70 +63,42 @@ export default function Bank() {
             return
         }
 
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-
-        // Validation: Check for overdraft (except deposits)
-        if (billType !== 'deposit') {
-            if (amount > currentBalance) {
-                setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
-        // Validation: Check for overpayment on loans/credit card
-        if (billType === 'autoLoan') {
-            const currentLoan = Number(selectedFamily.automobile_loan || 0)
-            if (amount > currentLoan) {
-                setError(`Cannot pay more than amount owed. Owed: $${currentLoan.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
-        if (billType === 'studentLoan') {
-            const currentLoan = Number(selectedFamily.student_loans || 0)
-            if (amount > currentLoan) {
-                setError(`Cannot pay more than amount owed. Owed: $${currentLoan.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
-        if (billType === 'creditCard') {
-            const currentBalance = Number(selectedFamily.credit_card || 0)
-            if (amount > currentBalance) {
-                setError(`Cannot pay more than amount owed. Owed: $${currentBalance.toFixed(2)}, Attempted: $${amount.toFixed(2)}`)
-                return
-            }
-        }
-
         try {
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            let endpoint = '';
+            let body = {};
+
+            if (billType === 'deposit') {
+                endpoint = '/api/transactions/deposit';
+                body = { family_id: selectedFamily.id, amount: amount };
+            } else if (billType === 'withdraw') {
+                endpoint = '/api/transactions/withdraw';
+                body = { family_id: selectedFamily.id, amount: amount };
+            } else if (billType === 'autoLoan') {
+                endpoint = '/api/transactions/pay-bill';
+                body = { family_id: selectedFamily.id, bill_type: 'autoLoan', amount: amount };
+            } else if (billType === 'studentLoan') {
+                endpoint = '/api/transactions/pay-bill';
+                body = { family_id: selectedFamily.id, bill_type: 'studentLoan', amount: amount };
+            } else if (billType === 'creditCard') {
+                endpoint = '/api/transactions/pay-bill';
+                body = { family_id: selectedFamily.id, bill_type: 'creditCard', amount: amount };
+            }
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...selectedFamily,
-                    bank_total: billType === 'deposit' 
-                        ? currentBalance + amount 
-                        : currentBalance - amount,
-                    automobile_loan: billType === 'autoLoan' 
-                        ? Math.max(0, selectedFamily.automobile_loan - amount) 
-                        : selectedFamily.automobile_loan,
-                    student_loans: billType === 'studentLoan' 
-                        ? Math.max(0, selectedFamily.student_loans - amount) 
-                        : selectedFamily.student_loans,
-                    credit_card: billType === 'creditCard'
-                        ? Math.max(0, selectedFamily.credit_card - amount)
-                        : selectedFamily.credit_card
-                })
+                body: JSON.stringify(body)
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
+            updateFamily(updatedFamily)
 
             // Update payment input fields with remaining balances
             setAutoLoanPayment(updatedFamily?.automobile_loan || 0)
@@ -158,7 +115,7 @@ export default function Bank() {
         }
     }
 
-    if (loading) {
+    if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading Bank...</div>
     }
 
