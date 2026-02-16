@@ -94,8 +94,8 @@ export default function Employer() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     person_id: selectedPerson.id,
-                    status: 'on_leave',
-                    value: checked
+                    status: 'OnLeave',
+                    value: checked ? 1 : 0
                 })
             })
             if (!res.ok) {
@@ -126,8 +126,8 @@ export default function Employer() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     person_id: selectedPerson.id,
-                    status: 'fired',
-                    value: checked
+                    status: 'Fired',
+                    value: checked ? 1 : 0
                 })
             })
             if (!res.ok) {

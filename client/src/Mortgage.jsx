@@ -108,7 +108,7 @@ export default function Mortgage() {
                 >
                     <option value="">-- Choose a family --</option>
                     {families
-                        .filter(family => Number(family.housing_mortgage) > 0)
+                        .filter(family => Number(family.housing_mortgage) > 0 || Number(family.housing_taxes) > 0 || Number(family.housing_maintenance) > 0)
                         .map(family => (
                             <option key={family.id} value={family.id}>
                                 {family.name}
@@ -132,7 +132,7 @@ export default function Mortgage() {
                                 type="number"
                                 value={mortgagePayment}
                                 onChange={(e) => setMortgagePayment(e.target.value)}
-                                disabled={selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null}
+                                disabled={(selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null)}
                             />
                             <button
                                 onClick={() => handlePayment('mortgage')}

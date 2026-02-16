@@ -247,7 +247,7 @@ async function payBill(familyId, billType, amount, week = null) {
  * @returns {object} Updated person data
  */
 async function setPersonStatus(personId, status, value) {
-    if (!personId || !['on_leave', 'fired'].includes(status)) {
+    if (!personId || !['OnLeave', 'Fired'].includes(status)) {
         throw new Error('Invalid parameters for status update');
     }
 
