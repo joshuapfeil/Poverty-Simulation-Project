@@ -1,44 +1,28 @@
 // Mortgage office takes mortgage, tax, and maintenance payments from families
 
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function Mortgage() {
-    const [families, setFamilies] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
     const [mortgagePayment, setMortgagePayment] = useState('')
     const [taxesPayment, setTaxesPayment] = useState('')
     const [maintenancePayment, setMaintenancePayment] = useState('')
-    const [loading, setLoading] = useState(true)
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
 
-    // Fetch families on mount
     useEffect(() => {
-        const fetchFamilies = () => {
-            setLoading(true)
-            fetch('/families/')
-                .then((r) => r.json())
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
 
-                //Polling Reload 
-                .then((j) => {
-                    setFamilies(j.data || [])
-                    // Update selected family if it exists in the new data
-                    if (selectedFamilyId) {
-                        const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
-                        if (updated) {
-                            setSelectedFamily(updated)
-                        }
-                    }
-                })
-                .catch((e) => setError(e.message))
-                .finally(() => setLoading(false))
+    // Keep selectedFamily in sync when families list updates (real-time updates)
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
         }
-
-        fetchFamilies()
-
-        const interval = setInterval(fetchFamilies, 10000) // Polling Rate in Milliseconds ie 1000 = 1 second
-        return () => clearInterval(interval)
-    }, [selectedFamilyId])
+    }, [families, selectedFamilyId])
 
     // When a family is selected, populate the payment amounts
     const handleFamilySelect = (e) => {
@@ -74,33 +58,26 @@ export default function Mortgage() {
             return
         }
 
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-        if (amount > currentBalance) {
-            setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
-            return
-        }
-
         try {
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/pay-bill', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...selectedFamily,
-                    bank_total: currentBalance - amount,
-                    housing_mortgage: billType === 'mortgage' ? Math.max(0, selectedFamily.housing_mortgage - amount) : selectedFamily.housing_mortgage,
-                    housing_taxes: billType === 'taxes' ? Math.max(0, selectedFamily.housing_taxes - amount) : selectedFamily.housing_taxes,
-                    housing_maintenance: billType === 'maintenance' ? Math.max(0, selectedFamily.housing_maintenance - amount) : selectedFamily.housing_maintenance
+                    family_id: selectedFamily.id,
+                    bill_type: billType,
+                    amount: amount
                 })
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
+            updateFamily(updatedFamily)
 
             if (billType === 'mortgage') setMortgagePayment('')
             if (billType === 'taxes') setTaxesPayment('')
@@ -112,7 +89,7 @@ export default function Mortgage() {
         }
     }
 
-    if (loading) {
+    if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading Mortgage & Realty...</div>
     }
 
@@ -130,11 +107,13 @@ export default function Mortgage() {
                     style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
                 >
                     <option value="">-- Choose a family --</option>
-                    {families.map(family => (
-                        <option key={family.id} value={family.id}>
-                            {family.name}
-                        </option>
-                    ))}
+                    {families
+                        .filter(family => Number(family.housing_mortgage) > 0 || Number(family.housing_taxes) > 0 || Number(family.housing_maintenance) > 0)
+                        .map(family => (
+                            <option key={family.id} value={family.id}>
+                                {family.name}
+                            </option>
+                        ))}
                 </select>
             </div>
 
@@ -153,7 +132,7 @@ export default function Mortgage() {
                                 type="number"
                                 value={mortgagePayment}
                                 onChange={(e) => setMortgagePayment(e.target.value)}
-                                disabled={selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null}
+                                disabled={(selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null)}
                             />
                             <button
                                 onClick={() => handlePayment('mortgage')}

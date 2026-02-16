@@ -53,9 +53,13 @@ async function edit(parameters = {}) {
         sets.push('age = ?');
         params.push(body.age);
     }
-    if (typeof body.is_working !== 'undefined') {
-        sets.push('is_working = ?');
-        params.push(body.is_working ? 1 : 0);
+    if (typeof body.OnLeave !== 'undefined') {
+        sets.push('OnLeave = ?');
+        params.push(body.OnLeave ? 1 : 0);
+    }
+    if (typeof body.Fired !== 'undefined') {
+        sets.push('Fired = ?');
+        params.push(body.Fired ? 1 : 0);
     }
     if (typeof body.medical_needs !== 'undefined') {
         sets.push('medical_needs = ?');

@@ -1,44 +1,28 @@
 // Utility company collects gas, phone, and electric bills from families
 
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function Utility() {
-    const [families, setFamilies] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
     const [gasPayment, setGasPayment] = useState('')
     const [phonePayment, setPhonePayment] = useState('')
     const [electricPayment, setElectricPayment] = useState('')
-    const [loading, setLoading] = useState(true)
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
 
-    // Fetch families on mount
     useEffect(() => {
-        const fetchFamilies = () => {
-            setLoading(true)
-            fetch('/families/')
-                .then((r) => r.json())
-                
-                //Polling Reload 
-                .then((j) => {
-                    setFamilies(j.data || [])
-                    // Update selected family if it exists in the new data
-                    if (selectedFamilyId) {
-                        const updated = (j.data || []).find(f => f.id === parseInt(selectedFamilyId))
-                        if (updated) {
-                            setSelectedFamily(updated)
-                        }
-                    }
-                })
-                .catch((e) => setError(e.message))
-                .finally(() => setLoading(false))
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
+
+    // Sync selectedFamily when families update
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
         }
-        
-        fetchFamilies()
-        
-        const interval = setInterval(fetchFamilies, 10000) // Polling Rate in Milliseconds ie 1000 = 1 second
-        return () => clearInterval(interval)
-    }, [selectedFamilyId])
+    }, [families, selectedFamilyId])
 
     // When a family is selected, populate the utility amounts
     const handleFamilySelect = (e) => {
@@ -74,33 +58,26 @@ export default function Utility() {
             return
         }
 
-        const currentBalance = Number(selectedFamily.bank_total || 0)
-        if (amount > currentBalance) {
-            setError(`Insufficient funds. Available: $${currentBalance.toFixed(2)}, Required: $${amount.toFixed(2)}`)
-            return
-        }
-
         try {
-            const res = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/pay-bill', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...selectedFamily,
-                    bank_total: currentBalance - amount, 
-                    utilities_gas: billType === 'gas' ? Math.max(0, selectedFamily.utilities_gas - amount) : selectedFamily.utilities_gas,
-                    utilities_phone: billType === 'phone' ? Math.max(0, selectedFamily.utilities_phone - amount) : selectedFamily.utilities_phone,
-                    utilities_electric: billType === 'electric' ? Math.max(0, selectedFamily.utilities_electric - amount) : selectedFamily.utilities_electric
+                    family_id: selectedFamily.id,
+                    bill_type: billType,
+                    amount: amount
                 })
             })
 
             if (!res.ok) {
-                const txt = await res.text().catch(() => null)
-                throw new Error(txt || `Failed to process payment (${res.status})`)
+                const err = await res.json()
+                throw new Error(err.message || `Failed to process payment (${res.status})`)
             }
 
             const json = await res.json()
-            const updatedFamily = json.data?.find(f => f.id === selectedFamily.id)
+            const updatedFamily = json.data
             setSelectedFamily(updatedFamily)
+            updateFamily(updatedFamily)
             
             if (billType === 'gas') setGasPayment('')
             if (billType === 'phone') setPhonePayment('')
@@ -112,7 +89,7 @@ export default function Utility() {
         }
     }
 
-    if (loading) {
+    if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading Utilities...</div>
     }
 

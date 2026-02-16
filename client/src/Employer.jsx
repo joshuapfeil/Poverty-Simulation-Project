@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import useFamilies from './useFamilies'
 
 export default function Employer() {
-    const [families, setFamilies] = useState([])
+    const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [people, setPeople] = useState([])
     const [selectedFamilyId, setSelectedFamilyId] = useState('')
     const [selectedFamily, setSelectedFamily] = useState(null)
@@ -10,28 +11,21 @@ export default function Employer() {
     const [selectedWeek, setSelectedWeek] = useState('1')
     const [onLeaveChecked, setOnLeaveChecked] = useState(false)
     const [firedChecked, setFiredChecked] = useState(false)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
     const [processing, setProcessing] = useState(false)
 
-    useEffect(() => {
-        const fetchFamilies = async () => {
-            setLoading(true)
-            try {
-                const res = await fetch('/families/')
-                if (!res.ok) throw new Error(`Families fetch failed (${res.status})`)
-                const j = await res.json()
-                setFamilies(j.data || [])
-                setError(null)
-            } catch (e) {
-                setError(e.message)
-            } finally {
-                setLoading(false)
-            }
-        }
+    const [error, setError] = useState(null)
 
-        fetchFamilies()
-    }, [])
+    useEffect(() => {
+        if (familiesError) setError(familiesError)
+    }, [familiesError])
+
+    // Sync selected family when families list updates (live updates)
+    useEffect(() => {
+        if (selectedFamilyId) {
+            const updated = families.find(f => f.id === parseInt(selectedFamilyId))
+            if (updated) setSelectedFamily(updated)
+        }
+    }, [families, selectedFamilyId])
 
     useEffect(() => {
         const fetchPeople = async () => {
@@ -95,17 +89,22 @@ export default function Employer() {
         if (!selectedPerson) return
 
         try {
-            const res = await fetch(`/people/${selectedPerson.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/set-status', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...selectedPerson,
-                    on_leave: checked ? 1 : 0
+                    person_id: selectedPerson.id,
+                    status: 'OnLeave',
+                    value: checked ? 1 : 0
                 })
             })
-            if (!res.ok) throw new Error('Update failed')
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.message || 'Update failed')
+            }
 
-            const updatedPerson = { ...selectedPerson, on_leave: checked ? 1 : 0 }
+            const json = await res.json()
+            const updatedPerson = json.data
             setSelectedPerson(updatedPerson)
 
             // Update in people array
@@ -122,17 +121,22 @@ export default function Employer() {
         if (!selectedPerson) return
 
         try {
-            const res = await fetch(`/people/${selectedPerson.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/set-status', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...selectedPerson,
-                    fired: checked ? 1 : 0
+                    person_id: selectedPerson.id,
+                    status: 'Fired',
+                    value: checked ? 1 : 0
                 })
             })
-            if (!res.ok) throw new Error('Update failed')
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.message || 'Update failed')
+            }
 
-            const updatedPerson = { ...selectedPerson, fired: checked ? 1 : 0 }
+            const json = await res.json()
+            const updatedPerson = json.data
             setSelectedPerson(updatedPerson)
 
             // Update in people array
@@ -154,24 +158,6 @@ export default function Employer() {
             return
         }
 
-        const fired = selectedPerson.fired ? true : false
-        const onLeave = selectedPerson.on_leave ? true : false
-
-        if (fired) {
-            setError('Cannot deposit - person has been fired')
-            return
-        }
-        if (onLeave) {
-            setError('Cannot deposit - person is on leave')
-            return
-        }
-
-        const weekPaid = isWeekPaid(selectedPerson, selectedWeek)
-        if (weekPaid) {
-            setError('This week has already been paid')
-            return
-        }
-
         const amount = getWeekPay(selectedPerson, selectedWeek)
         if (!amount) {
             setError('No pay for selected week')
@@ -180,36 +166,29 @@ export default function Employer() {
 
         setProcessing(true)
         try {
-            // Update family bank total
-            const familyRes = await fetch(`/families/${selectedFamily.id}`, {
-                method: 'PUT',
+            const res = await fetch('/api/transactions/pay-employee', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    ...selectedFamily,
-                    bank_total: (selectedFamily.bank_total || 0) + amount
+                    family_id: selectedFamily.id,
+                    person_id: selectedPerson.id,
+                    week: Number(selectedWeek),
+                    amount: amount
                 })
             })
-            if (!familyRes.ok) throw new Error('Family update failed')
 
-            // Mark week as paid for person
-            const paidField = `week${selectedWeek}_paid`
-            const personRes = await fetch(`/people/${selectedPerson.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...selectedPerson,
-                    [paidField]: 1
-                })
-            })
-            if (!personRes.ok) throw new Error('Person update failed')
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.message || 'Payment failed')
+            }
 
-            // Update local state
-            const updatedFamily = { ...selectedFamily, bank_total: (selectedFamily.bank_total || 0) + amount }
-            const updatedPerson = { ...selectedPerson, [paidField]: 1 }
+            const json = await res.json()
+            const { family: updatedFamily, person: updatedPerson } = json.data
 
             setSelectedFamily(updatedFamily)
             setSelectedPerson(updatedPerson)
             setPeople(people.map(p => p.id === updatedPerson.id ? updatedPerson : p))
+            updateFamily(updatedFamily)
 
             setError(null)
         } catch (e) {
@@ -219,7 +198,7 @@ export default function Employer() {
         }
     }
 
-    if (loading) return <div style={{ padding: 20 }}>Loading...</div>
+    if (familiesLoading) return <div style={{ padding: 20 }}>Loading...</div>
 
     const familyPeople = people.filter(p => p.Week1Pay > 100)
 
