@@ -14,6 +14,10 @@ export default function PeopleManager({ familyId }) {
   const [week2, setWeek2] = useState('')
   const [week3, setWeek3] = useState('')
   const [week4, setWeek4] = useState('')
+  const [week1Paid, setWeek1Paid] = useState(false)
+  const [week2Paid, setWeek2Paid] = useState(false)
+  const [week3Paid, setWeek3Paid] = useState(false)
+  const [week4Paid, setWeek4Paid] = useState(false)
   const [onLeave, setOnLeave] = useState(false)
   const [fired, setFired] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -23,6 +27,10 @@ export default function PeopleManager({ familyId }) {
   const [editWeek2, setEditWeek2] = useState('')
   const [editWeek3, setEditWeek3] = useState('')
   const [editWeek4, setEditWeek4] = useState('')
+  const [editWeek1Paid, setEditWeek1Paid] = useState(false)
+  const [editWeek2Paid, setEditWeek2Paid] = useState(false)
+  const [editWeek3Paid, setEditWeek3Paid] = useState(false)
+  const [editWeek4Paid, setEditWeek4Paid] = useState(false)
   const [editOnLeave, setEditOnLeave] = useState(false)
   const [editFired, setEditFired] = useState(false)
   const [error, setError] = useState(null)
@@ -64,6 +72,10 @@ export default function PeopleManager({ familyId }) {
           Week2Pay: Number(week2) || 0,
           Week3Pay: Number(week3) || 0,
           Week4Pay: Number(week4) || 0,
+          week1_paid: week1Paid ? 1 : 0,
+          week2_paid: week2Paid ? 1 : 0,
+          week3_paid: week3Paid ? 1 : 0,
+          week4_paid: week4Paid ? 1 : 0,
           OnLeave: onLeave,
           Fired: fired
         })
@@ -99,6 +111,10 @@ export default function PeopleManager({ familyId }) {
     setEditWeek2(p.Week2Pay != null ? String(p.Week2Pay) : '')
     setEditWeek3(p.Week3Pay != null ? String(p.Week3Pay) : '')
     setEditWeek4(p.Week4Pay != null ? String(p.Week4Pay) : '')
+    setEditWeek1Paid(Boolean(p.week1_paid || p.Week1Pay === 1))
+    setEditWeek2Paid(Boolean(p.week2_paid || p.Week2Pay === 1))
+    setEditWeek3Paid(Boolean(p.week3_paid || p.Week3Pay === 1))
+    setEditWeek4Paid(Boolean(p.week4_paid || p.Week4Pay === 1))
     setEditOnLeave(Boolean(p.OnLeave))
     setEditFired(Boolean(p.Fired))
   }
@@ -111,6 +127,10 @@ export default function PeopleManager({ familyId }) {
     setEditWeek2('')
     setEditWeek3('')
     setEditWeek4('')
+    setEditWeek1Paid(false)
+    setEditWeek2Paid(false)
+    setEditWeek3Paid(false)
+    setEditWeek4Paid(false)
     setEditOnLeave(false)
     setEditFired(false)
   }
@@ -129,6 +149,10 @@ export default function PeopleManager({ familyId }) {
           Week2Pay: Number(editWeek2) || 0,
           Week3Pay: Number(editWeek3) || 0,
           Week4Pay: Number(editWeek4) || 0,
+          week1_paid: editWeek1Paid ? 1 : 0,
+          week2_paid: editWeek2Paid ? 1 : 0,
+          week3_paid: editWeek3Paid ? 1 : 0,
+          week4_paid: editWeek4Paid ? 1 : 0,
           OnLeave: editOnLeave,
           Fired: editFired
         })
@@ -172,9 +196,13 @@ export default function PeopleManager({ familyId }) {
         <input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         <input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} style={{ marginLeft: 6 }} />
         <input placeholder="Week1 pay" type="number" value={week1} onChange={(e) => setWeek1(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week1Paid} onChange={(e) => setWeek1Paid(e.target.checked)} /> Paid</label>
         <input placeholder="Week2 pay" type="number" value={week2} onChange={(e) => setWeek2(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week2Paid} onChange={(e) => setWeek2Paid(e.target.checked)} /> Paid</label>
         <input placeholder="Week3 pay" type="number" value={week3} onChange={(e) => setWeek3(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week3Paid} onChange={(e) => setWeek3Paid(e.target.checked)} /> Paid</label>
         <input placeholder="Week4 pay" type="number" value={week4} onChange={(e) => setWeek4(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week4Paid} onChange={(e) => setWeek4Paid(e.target.checked)} /> Paid</label>
         <label style={{ marginLeft: 6 }}>
           <input type="checkbox" checked={onLeave} onChange={(e) => setOnLeave(e.target.checked)} /> On leave
         </label>
@@ -193,9 +221,13 @@ export default function PeopleManager({ familyId }) {
                   <input value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} />
                   <input value={editLastName} onChange={(e) => setEditLastName(e.target.value)} style={{ marginLeft: 6 }} />
                   <input value={editWeek1} onChange={(e) => setEditWeek1(e.target.value)} type="number" style={{ marginLeft: 6, width: 100 }} />
+                  <label style={{ marginLeft: 6 }}><input type="checkbox" checked={editWeek1Paid} onChange={(e) => setEditWeek1Paid(e.target.checked)} /> Paid</label>
                   <input value={editWeek2} onChange={(e) => setEditWeek2(e.target.value)} type="number" style={{ marginLeft: 6, width: 100 }} />
+                  <label style={{ marginLeft: 6 }}><input type="checkbox" checked={editWeek2Paid} onChange={(e) => setEditWeek2Paid(e.target.checked)} /> Paid</label>
                   <input value={editWeek3} onChange={(e) => setEditWeek3(e.target.value)} type="number" style={{ marginLeft: 6, width: 100 }} />
+                  <label style={{ marginLeft: 6 }}><input type="checkbox" checked={editWeek3Paid} onChange={(e) => setEditWeek3Paid(e.target.checked)} /> Paid</label>
                   <input value={editWeek4} onChange={(e) => setEditWeek4(e.target.value)} type="number" style={{ marginLeft: 6, width: 100 }} />
+                  <label style={{ marginLeft: 6 }}><input type="checkbox" checked={editWeek4Paid} onChange={(e) => setEditWeek4Paid(e.target.checked)} /> Paid</label>
                   <label style={{ marginLeft: 6 }}>
                     <input type="checkbox" checked={editOnLeave} onChange={(e) => setEditOnLeave(e.target.checked)} /> On leave
                   </label>
@@ -205,7 +237,7 @@ export default function PeopleManager({ familyId }) {
                 </div>
               ) : (
                 <div>
-                  {p.first_name} {p.last_name} — W1: {p.Week1Pay || 0} W2: {p.Week2Pay || 0} W3: {p.Week3Pay || 0} W4: {p.Week4Pay || 0} — {p.OnLeave ? 'On Leave' : 'Not On Leave'} — {p.Fired ? 'Fired' : 'Not Fired'}
+                  {p.first_name} {p.last_name} — W1: {p.Week1Pay || 0}{p.week1_paid ? ' (PAID)' : ''} W2: {p.Week2Pay || 0}{p.week2_paid ? ' (PAID)' : ''} W3: {p.Week3Pay || 0}{p.week3_paid ? ' (PAID)' : ''} W4: {p.Week4Pay || 0}{p.week4_paid ? ' (PAID)' : ''} — {p.OnLeave ? 'On Leave' : 'Not On Leave'} — {p.Fired ? 'Fired' : 'Not Fired'}
                 </div>
               )}
             </div>

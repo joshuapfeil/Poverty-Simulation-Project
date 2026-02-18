@@ -22,8 +22,9 @@ async function insert(parameters = {}) {
         name, bank_total, monthly_bills,
         housing_mortgage, housing_taxes, housing_maintenance,
         utilities_gas, utilities_electric, utilities_phone,
-        student_loans, food_weekly, clothing, credit_card, automobile_loan
-    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+        student_loans, food_weekly, clothing, credit_card, automobile_loan,
+        prescriptions, misc_supercenter, misc_bank
+    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
     
     let queryParameters = [];
     const body = parameters.body;
@@ -53,6 +54,9 @@ async function insert(parameters = {}) {
     queryParameters.push(body.clothing != null ? body.clothing : 0);
     queryParameters.push(body.credit_card != null ? body.credit_card : 0);
     queryParameters.push(body.automobile_loan != null ? body.automobile_loan : 0);
+    queryParameters.push(body.misc_supercenter != null ? body.misc_supercenter : 0);
+    queryParameters.push(body.misc_bank != null ? body.misc_bank : 0);
+    queryParameters.push(body.prescriptions != null ? body.prescriptions : 0);
 
     await connection.query(insertSql, queryParameters);
 }
@@ -149,12 +153,16 @@ async function edit(parameters = {}) {
         queryParameters.push(body.automobile_loan);
     }
 
-    // Misc expenses
-    if (typeof body.misc !== 'undefined' && body.misc !== null && body.misc !== '') {
-        sets.push('misc = ?');
-        queryParameters.push(body.misc);
+    // // Misc expenses
+    
+    if (typeof body.misc_supercenter !== 'undefined' && body.misc_supercenter !== null && body.misc_supercenter !== '') {
+        sets.push('misc_supercenter = ?');
+        queryParameters.push(body.misc_supercenter);
     }
-
+    if (typeof body.misc_bank !== 'undefined' && body.misc_bank !== null && body.misc_bank !== '') {
+        sets.push('misc_bank = ?');
+        queryParameters.push(body.misc_bank);
+    }
     // Prescriptions
     if (typeof body.prescriptions !== 'undefined' && body.prescriptions !== null && body.prescriptions !== '') {
         sets.push('prescriptions = ?');

@@ -28,6 +28,15 @@ export default function FamiliesAdmin() {
   const [clothing, setClothing] = useState('')
   const [creditCard, setCreditCard] = useState('')
   const [automobileLoan, setAutomobileLoan] = useState('')
+  // Additional fields admin should be able to manage
+  const [misc, setMisc] = useState('')
+  const [prescriptions, setPrescriptions] = useState('')
+  const [medical, setMedical] = useState('')
+  // Food-week paid flags (admin can toggle these)
+  const [foodWeek1Paid, setFoodWeek1Paid] = useState(false)
+  const [foodWeek2Paid, setFoodWeek2Paid] = useState(false)
+  const [foodWeek3Paid, setFoodWeek3Paid] = useState(false)
+  const [foodWeek4Paid, setFoodWeek4Paid] = useState(false) 
 
   // Edit state
   const [editingId, setEditingId] = useState(null)
@@ -44,6 +53,14 @@ export default function FamiliesAdmin() {
   const [editClothing, setEditClothing] = useState('')
   const [editCreditCard, setEditCreditCard] = useState('')
   const [editAutomobileLoan, setEditAutomobileLoan] = useState('')
+  // Edit-mode fields for misc/prescriptions/medical and food-week paid flags
+  const [editMisc, setEditMisc] = useState('')
+  const [editPrescriptions, setEditPrescriptions] = useState('')
+  const [editMedical, setEditMedical] = useState('')
+  const [editFoodWeek1Paid, setEditFoodWeek1Paid] = useState(false)
+  const [editFoodWeek2Paid, setEditFoodWeek2Paid] = useState(false)
+  const [editFoodWeek3Paid, setEditFoodWeek3Paid] = useState(false)
+  const [editFoodWeek4Paid, setEditFoodWeek4Paid] = useState(false) 
 
   const [showPeople, setShowPeople] = useState({})
   const [loading, setLoading] = useState(true)
@@ -86,7 +103,14 @@ export default function FamiliesAdmin() {
           food_weekly: Number(foodWeekly) || 0,
           clothing: Number(clothing) || 0,
           credit_card: Number(creditCard) || 0,
-          automobile_loan: Number(automobileLoan) || 0
+          automobile_loan: Number(automobileLoan) || 0,
+          misc: Number(misc) || 0,
+          prescriptions: Number(prescriptions) || 0,
+          medical: Number(medical) || 0,
+          food_week1_paid: foodWeek1Paid ? 1 : 0,
+          food_week2_paid: foodWeek2Paid ? 1 : 0,
+          food_week3_paid: foodWeek3Paid ? 1 : 0,
+          food_week4_paid: foodWeek4Paid ? 1 : 0
         })
       })
       if (!res.ok) {
@@ -110,6 +134,13 @@ export default function FamiliesAdmin() {
       setClothing('')
       setCreditCard('')
       setAutomobileLoan('')
+      setMisc('')
+      setPrescriptions('')
+      setMedical('')
+      setFoodWeek1Paid(false)
+      setFoodWeek2Paid(false)
+      setFoodWeek3Paid(false)
+      setFoodWeek4Paid(false) 
     } catch (err) {
       setError(err.message)
     }
@@ -144,6 +175,13 @@ export default function FamiliesAdmin() {
     setEditClothing(f.clothing || '')
     setEditCreditCard(f.credit_card || '')
     setEditAutomobileLoan(f.automobile_loan || '')
+    setEditMisc(f.misc || '')
+    setEditPrescriptions(f.prescriptions || '')
+    setEditMedical(f.medical || '')
+    setEditFoodWeek1Paid(Boolean(f.food_week1_paid))
+    setEditFoodWeek2Paid(Boolean(f.food_week2_paid))
+    setEditFoodWeek3Paid(Boolean(f.food_week3_paid))
+    setEditFoodWeek4Paid(Boolean(f.food_week4_paid)) 
   }
 
   const cancelEdit = () => {
@@ -161,6 +199,13 @@ export default function FamiliesAdmin() {
     setEditClothing('')
     setEditCreditCard('')
     setEditAutomobileLoan('')
+    setEditMisc('')
+    setEditPrescriptions('')
+    setEditMedical('')
+    setEditFoodWeek1Paid(false)
+    setEditFoodWeek2Paid(false)
+    setEditFoodWeek3Paid(false)
+    setEditFoodWeek4Paid(false) 
   }
 
   const saveEdit = async (id) => {
@@ -181,7 +226,14 @@ export default function FamiliesAdmin() {
           food_weekly: Number(editFoodWeekly) || 0,
           clothing: Number(editClothing) || 0,
           credit_card: Number(editCreditCard) || 0,
-          automobile_loan: Number(editAutomobileLoan) || 0
+          automobile_loan: Number(editAutomobileLoan) || 0,
+          misc: Number(editMisc) || 0,
+          prescriptions: Number(editPrescriptions) || 0,
+          medical: Number(editMedical) || 0,
+          food_week1_paid: editFoodWeek1Paid ? 1 : 0,
+          food_week2_paid: editFoodWeek2Paid ? 1 : 0,
+          food_week3_paid: editFoodWeek3Paid ? 1 : 0,
+          food_week4_paid: editFoodWeek4Paid ? 1 : 0
         })
       })
       if (!res.ok) {
@@ -215,6 +267,9 @@ export default function FamiliesAdmin() {
       (Number(family.utilities_phone) || 0) +
       (Number(family.student_loans) || 0) +
       (Number(family.clothing) || 0) +
+      (Number(family.prescriptions) || 0) +
+      (Number(family.misc) || 0) +
+      (Number(family.medical) || 0) +
       (Number(family.credit_card) || 0) +
       (Number(family.automobile_loan) || 0)
     )
@@ -300,6 +355,18 @@ export default function FamiliesAdmin() {
               <input type="number" step="0.01" value={clothing} onChange={(e) => setClothing(e.target.value)} placeholder="$40.00" style={{ width: '100%' }} />
             </div>
             <div>
+              <label>Prescriptions:</label>
+              <input type="number" step="0.01" value={prescriptions} onChange={(e) => setPrescriptions(e.target.value)} placeholder="$25.00" style={{ width: '100%' }} />
+            </div>
+            <div>
+              <label>Miscellaneous:</label>
+              <input type="number" step="0.01" value={misc} onChange={(e) => setMisc(e.target.value)} placeholder="$15.00" style={{ width: '100%' }} />
+            </div>
+            <div>
+              <label>Medical (owed):</label>
+              <input type="number" step="0.01" value={medical} onChange={(e) => setMedical(e.target.value)} placeholder="$0.00" style={{ width: '100%' }} />
+            </div>
+            <div>
               <label>Credit Card Minimum:</label>
               <input type="number" step="0.01" value={creditCard} onChange={(e) => setCreditCard(e.target.value)} placeholder="$150.00" style={{ width: '100%' }} />
             </div>
@@ -307,6 +374,15 @@ export default function FamiliesAdmin() {
               <label>Automobile Loan:</label>
               <input type="number" step="0.01" value={automobileLoan} onChange={(e) => setAutomobileLoan(e.target.value)} placeholder="$250.00" style={{ width: '100%' }} />
             </div>
+          </div>
+
+          {/* Food weeks paid - admin can toggle these when creating a family */}
+          <div style={{ marginTop: 10 }}>
+            <label style={{ marginRight: 8 }}>Food weeks already paid:</label>
+            <label style={{ marginRight: 8 }}><input type="checkbox" checked={foodWeek1Paid} onChange={(e) => setFoodWeek1Paid(e.target.checked)} /> W1</label>
+            <label style={{ marginRight: 8 }}><input type="checkbox" checked={foodWeek2Paid} onChange={(e) => setFoodWeek2Paid(e.target.checked)} /> W2</label>
+            <label style={{ marginRight: 8 }}><input type="checkbox" checked={foodWeek3Paid} onChange={(e) => setFoodWeek3Paid(e.target.checked)} /> W3</label>
+            <label><input type="checkbox" checked={foodWeek4Paid} onChange={(e) => setFoodWeek4Paid(e.target.checked)} /> W4</label>
           </div>
         </fieldset>
 
@@ -362,8 +438,19 @@ export default function FamiliesAdmin() {
                         <input value={editStudentLoans} onChange={(e) => setEditStudentLoans(e.target.value)} placeholder="Student Loans" type="number" step="0.01" />
                         <input value={editFoodWeekly} onChange={(e) => setEditFoodWeekly(e.target.value)} placeholder="Food (weekly)" type="number" step="0.01" />
                         <input value={editClothing} onChange={(e) => setEditClothing(e.target.value)} placeholder="Clothing" type="number" step="0.01" />
-                        <input value={editCreditCard} onChange={(e) => setEditCreditCard(e.target.value)} placeholder="Credit Card" type="number" step="0.01" />
-                        <input value={editAutomobileLoan} onChange={(e) => setEditAutomobileLoan(e.target.value)} placeholder="Auto Loan" type="number" step="0.01" />
+                          <input value={editPrescriptions} onChange={(e) => setEditPrescriptions(e.target.value)} placeholder="Prescriptions" type="number" step="0.01" />
+                          <input value={editMisc} onChange={(e) => setEditMisc(e.target.value)} placeholder="Misc" type="number" step="0.01" />
+                          <input value={editMedical} onChange={(e) => setEditMedical(e.target.value)} placeholder="Medical (owed)" type="number" step="0.01" />
+                          <input value={editCreditCard} onChange={(e) => setEditCreditCard(e.target.value)} placeholder="Credit Card" type="number" step="0.01" />
+                          <input value={editAutomobileLoan} onChange={(e) => setEditAutomobileLoan(e.target.value)} placeholder="Auto Loan" type="number" step="0.01" />
+                        </div>
+
+                        <div style={{ marginTop: 10 }}>
+                          <label style={{ marginRight: 8 }}>Food weeks paid:</label>
+                          <label style={{ marginRight: 8 }}><input type="checkbox" checked={editFoodWeek1Paid} onChange={(e) => setEditFoodWeek1Paid(e.target.checked)} /> W1</label>
+                          <label style={{ marginRight: 8 }}><input type="checkbox" checked={editFoodWeek2Paid} onChange={(e) => setEditFoodWeek2Paid(e.target.checked)} /> W2</label>
+                          <label style={{ marginRight: 8 }}><input type="checkbox" checked={editFoodWeek3Paid} onChange={(e) => setEditFoodWeek3Paid(e.target.checked)} /> W3</label>
+                          <label><input type="checkbox" checked={editFoodWeek4Paid} onChange={(e) => setEditFoodWeek4Paid(e.target.checked)} /> W4</label>
                       </div>
                     </div>
                   ) : (
@@ -385,8 +472,16 @@ export default function FamiliesAdmin() {
                           {f.utilities_phone > 0 && <div>Utilities - Phone: ${f.utilities_phone}</div>}
                           {f.student_loans > 0 && <div>Student Loans: ${f.student_loans}</div>}
                           {f.clothing > 0 && <div>Clothing: ${f.clothing}</div>}
+                          {f.prescriptions > 0 && <div>Prescriptions: ${f.prescriptions}</div>}
+                          {f.misc > 0 && <div>Miscellaneous: ${f.misc}</div>}
+                          {f.medical > 0 && <div>Medical: ${f.medical}</div>}
                           {f.credit_card > 0 && <div>Credit Card: ${f.credit_card}</div>}
                           {f.automobile_loan > 0 && <div>Automobile Loan: ${f.automobile_loan}</div>}
+                          {(f.food_week1_paid === 1 || f.food_week2_paid === 1 || f.food_week3_paid === 1 || f.food_week4_paid === 1) && (
+                            <div style={{ marginTop: 8 }}>
+                              Food Weeks Paid: {f.food_week1_paid === 1 ? 'W1 ' : ''}{f.food_week2_paid === 1 ? 'W2 ' : ''}{f.food_week3_paid === 1 ? 'W3 ' : ''}{f.food_week4_paid === 1 ? 'W4' : ''}
+                            </div>
+                          )}
                         </div>
                       </details>
                     </div>

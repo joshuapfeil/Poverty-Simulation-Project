@@ -63,7 +63,10 @@ export default function FamilyView() {
         (Number(family.student_loans) || 0) +
         (Number(family.clothing) || 0) +
         (Number(family.credit_card) || 0) +
-        (Number(family.automobile_loan) || 0)
+        (Number(family.automobile_loan) || 0) +
+        (Number(family.prescriptions) || 0) +
+        (Number(family.misc_supercenter) || 0) +
+        (Number(family.misc_bank) || 0)
     )
   }
 
@@ -121,25 +124,26 @@ export default function FamilyView() {
               <div id="section">
                 <h3>Bills to Pay This Month</h3>
 
-                {/* Housing Section */}
-                {calculateHousingTotal() > 0 && (
-                    <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                      <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>
-                        Housing (Pay to Sweaney Mortgage & Realty) - ${calculateHousingTotal().toFixed(2)}
-                      </h4>
-                      <div style={{ marginLeft: '20px' }}>
-                        {family.housing_mortgage > 0 && (
-                            <p style={{ margin: '5px 0' }}><b>Mortgage:</b> ${Number(family.housing_mortgage).toFixed(2)}</p>
-                        )}
-                        {family.housing_taxes > 0 && (
-                            <p style={{ margin: '5px 0' }}><b>Taxes:</b> ${Number(family.housing_taxes).toFixed(2)}</p>
-                        )}
-                        {family.housing_maintenance > 0 && (
-                            <p style={{ margin: '5px 0' }}><b>Maintenance:</b> ${Number(family.housing_maintenance).toFixed(2)}</p>
-                        )}
-                      </div>
-                    </div>
-                )}
+                {/* Housing Section (always shown for consistency) */}
+                <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+                  <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>
+                    Housing (Pay to Sweaney Mortgage & Realty) - ${calculateHousingTotal().toFixed(2)}
+                  </h4>
+                  <div style={{ marginLeft: '20px' }}>
+                    {family.housing_mortgage > 0 && (
+                        <p style={{ margin: '5px 0' }}><b>Mortgage:</b> ${Number(family.housing_mortgage).toFixed(2)}</p>
+                    )}
+                    {family.housing_taxes > 0 && (
+                        <p style={{ margin: '5px 0' }}><b>Taxes:</b> ${Number(family.housing_taxes).toFixed(2)}</p>
+                    )}
+                    {family.housing_maintenance > 0 && (
+                        <p style={{ margin: '5px 0' }}><b>Maintenance:</b> ${Number(family.housing_maintenance).toFixed(2)}</p>
+                    )}
+                    { ( (family.housing_mortgage || 0) === 0 && (family.housing_taxes || 0) === 0 && (family.housing_maintenance || 0) === 0 ) && (
+                        <p style={{ margin: '5px 0', color: '#666' }}>No housing charges at this time.</p>
+                    )}
+                  </div>
+                </div>
 
                 {/* Utilities Section */}
                 {calculateUtilitiesTotal() > 0 && (
@@ -205,10 +209,22 @@ export default function FamilyView() {
                   <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Other Monthly Bills</h4>
                   <div style={{ marginLeft: '20px' }}>
                     {family.student_loans > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Student Loans</b> (Pay to U Trust US National Bank): ${Number(family.student_loans).toFixed(2)}</p>
+                        <p style={{ margin: '5px 0' }}><b>Student Loans</b> (Pay to U Trust US National Bank): ${Number(family.student_loans).toFix_supercentered(2)}</p>
                     )}
                     {family.clothing > 0 && (
                         <p style={{ margin: '5px 0' }}><b>Clothing</b> (Pay to Food-A-Rama Super Center): ${Number(family.clothing).toFixed(2)}</p>
+                    )}
+                    {family.prescriptions > 0 && (
+                        <p style={{ margin: '5px 0' }}><b>Prescriptions</b> (Pay to Food-A-Rama Super Center): ${Number(family.prescriptions).toFixed(2)}</p>
+                    )}
+                    {family.misc_supercenter > 0 && (
+                        <p style={{ margin: '5px 0' }}><b>Miscellaneous</b> (Pay to Food-A-Rama Super Center): ${Number(family.misc_supercenter).toFixed(2)}</p>
+                    )}
+                    {family.misc_bank > 0 && (
+                        <p style={{ margin: '5px 0' }}><b>Miscellaneous</b> (Pay to U Trust US National Bank): ${Number(family.misc_bank).toFixed(2)}</p>
+                    )}
+                    {family.medical > 0 && (
+                        <p style={{ margin: '5px 0' }}><b>Medical</b> (Pay to Community Healthcare): ${Number(family.medical).toFixed(2)}</p>
                     )}
                     {family.credit_card > 0 && (
                         <p style={{ margin: '5px 0' }}><b>Credit Card Minimum Payment</b> (Pay to U Trust US National Bank): ${Number(family.credit_card).toFixed(2)}</p>

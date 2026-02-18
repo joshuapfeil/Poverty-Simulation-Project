@@ -40,7 +40,10 @@ function query(sql, params) {
                     food_weekly REAL DEFAULT 0,
                     clothing REAL DEFAULT 0,
                     credit_card REAL DEFAULT 0,
-                    automobile_loan REAL DEFAULT 0
+                    automobile_loan REAL DEFAULT 0,
+                    misc_supercenter REAL DEFAULT 0,
+                    misc_bank REAL DEFAULT 0,
+                    prescriptions REAL DEFAULT 0
                 );`
             );
 
@@ -64,7 +67,10 @@ function query(sql, params) {
                         'food_weekly',
                         'clothing',
                         'credit_card',
-                        'automobile_loan'
+                        'automobile_loan',
+                        'misc_supercenter',
+                        'misc_bank',
+                        'prescriptions',
                     ];
                     
                     columnsToAdd.forEach(col => {

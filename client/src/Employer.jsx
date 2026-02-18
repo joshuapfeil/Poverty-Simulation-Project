@@ -27,6 +27,17 @@ export default function Employer() {
         }
     }, [families, selectedFamilyId])
 
+    // Keep selected person synced when the people list updates (handles flags set before page load)
+    useEffect(() => {
+        if (!selectedPersonId) return
+        const updated = people.find(p => p.id === parseInt(selectedPersonId))
+        if (updated) {
+            setSelectedPerson(updated)
+            setOnLeaveChecked(Boolean(updated.OnLeave ?? updated.on_leave ?? false))
+            setFiredChecked(Boolean(updated.Fired ?? updated.fired ?? false))
+        }
+    }, [people, selectedPersonId])
+
     useEffect(() => {
         const fetchPeople = async () => {
             try {
@@ -47,8 +58,10 @@ export default function Employer() {
         setSelectedPersonId(id)
         const p = people.find(pp => pp.id === parseInt(id))
         setSelectedPerson(p || null)
-        setOnLeaveChecked(p?.on_leave ?? false)
-        setFiredChecked(p?.fired ?? false)
+
+        // support both capitalized and snake_case fields returned by the API
+        setOnLeaveChecked(Boolean(p?.OnLeave ?? p?.on_leave ?? false))
+        setFiredChecked(Boolean(p?.Fired ?? p?.fired ?? false))
 
         // Auto-select family based on person's last_name
         if (p) {
@@ -77,10 +90,24 @@ export default function Employer() {
         return 0
     }
 
+    // Return true for a variety of stored values (1, '1', true)
     const isWeekPaid = (person, week) => {
         if (!person) return false
-        const paidField = `week${week}_paid`
-        return person[paidField] === 1
+        const candidates = [
+            `week${week}_paid`,
+            `week${week}paid`,
+            `week${week}Paid`,
+            `Week${week}Paid`
+        ]
+        for (const key of candidates) {
+            if (typeof person[key] !== 'undefined' && person[key] !== null) {
+                const v = person[key]
+                if (v === 1 || v === '1' || v === true) return true
+                // numeric-like strings should be treated as numbers
+                if (!Number.isNaN(Number(v)) && Number(v) === 1) return true
+            }
+        }
+        return false
     }
 
     const handleOnLeaveChange = async (e) => {
@@ -208,11 +235,15 @@ export default function Employer() {
             return { disabled: true, text: 'Paycheck' }
         }
 
-        if (selectedPerson.fired) {
+        // Support multiple property namings returned by the API
+        const isFired = Boolean(selectedPerson.Fired ?? selectedPerson.fired ?? firedChecked)
+        const isOnLeave = Boolean(selectedPerson.OnLeave ?? selectedPerson.on_leave ?? onLeaveChecked)
+
+        if (isFired) {
             return { disabled: true, text: 'FIRED' }
         }
 
-        if (selectedPerson.on_leave) {
+        if (isOnLeave) {
             return { disabled: true, text: 'ON LEAVE' }
         }
 

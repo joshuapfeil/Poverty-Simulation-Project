@@ -11,6 +11,7 @@ export default function Bank() {
     const [autoLoanPayment, setAutoLoanPayment] = useState('')
     const [studentLoanPayment, setStudentLoanPayment] = useState('')
     const [creditCardPayment, setCreditCardPayment] = useState('')
+    const [miscBankPayment, setMiscBankPayment] = useState('')
     const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
 
@@ -37,11 +38,13 @@ export default function Bank() {
             setAutoLoanPayment(family?.automobile_loan || 0)
             setStudentLoanPayment(family?.student_loans || 0)
             setCreditCardPayment(family?.credit_card || 0)
+            setMiscBankPayment(family?.misc_bank || 0)
         } else {
             setSelectedFamily(null)
             setAutoLoanPayment('')
             setStudentLoanPayment('')
             setCreditCardPayment('')
+            setMiscBankPayment('')
         }
     }
 
@@ -56,7 +59,8 @@ export default function Bank() {
                 billType === 'autoLoan' ? Number(autoLoanPayment) :
                     billType === 'studentLoan' ? Number(studentLoanPayment) :
                         billType === 'creditCard' ? Number(creditCardPayment) :
-                            0
+                            billType === 'miscBank' ? Number(miscBankPayment) :
+                                0
 
         if (!amount || amount <= 0) {
             setError('Please enter a valid amount')
@@ -82,6 +86,9 @@ export default function Bank() {
             } else if (billType === 'creditCard') {
                 endpoint = '/api/transactions/pay-bill';
                 body = { family_id: selectedFamily.id, bill_type: 'creditCard', amount: amount };
+            } else if (billType === 'miscBank') {
+                endpoint = '/api/transactions/pay-bill';
+                body = { family_id: selectedFamily.id, bill_type: 'miscBank', amount: amount };
             }
 
             const res = await fetch(endpoint, {
@@ -104,7 +111,7 @@ export default function Bank() {
             setAutoLoanPayment(updatedFamily?.automobile_loan || 0)
             setStudentLoanPayment(updatedFamily?.student_loans || 0)
             setCreditCardPayment(updatedFamily?.credit_card || 0)
-
+            setMiscBankPayment(updatedFamily?.misc_bank || 0)
             // Clear deposit and withdraw inputs
             if (billType === 'deposit') setDepositAmount('')
             if (billType === 'withdraw') setWithdrawAmount('')
@@ -227,6 +234,22 @@ export default function Bank() {
                                         disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
                                     >
                                         {selectedFamily.credit_card === 0 || selectedFamily.credit_card === null ? 'PAID' : 'Pay Credit Card'}
+                                    </button>
+                                </div>
+                                <div>
+                                    <h4>Miscelanious Payments</h4>
+                                    <p>Amount Owed: ${(selectedFamily.misc_bank || 0).toFixed(2)}</p>
+                                    <input
+                                        type="number"
+                                        value={miscBankPayment}
+                                        onChange={(e) => setMiscBankPayment(e.target.value)}
+                                        disabled={selectedFamily.misc_bank === 0 || selectedFamily.misc_bank === null}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('miscBank')}
+                                        disabled={selectedFamily.misc_bank === 0 || selectedFamily.misc_bank === null}
+                                    >
+                                        {selectedFamily.misc_bank === 0 || selectedFamily.misc_bank === null ? 'PAID' : 'Pay Miscellaneous'}
                                     </button>
                                 </div>
                             </div>

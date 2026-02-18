@@ -115,8 +115,9 @@ async function payEmployee(familyId, personId, weekNumber, amount) {
         throw new Error('Cannot deposit - person is on leave');
     }
 
-    // Check if week already paid
-    const paidField = `week${weekNumber}_paid`;
+    // Check if week already paid — support both legacy `weekN_paid` and `WeekNPay` column names
+    const possiblePaidFields = [`week${weekNumber}_paid`, `Week${weekNumber}Pay`];
+    const paidField = possiblePaidFields.find(f => typeof person[f] !== 'undefined') || `Week${weekNumber}Pay`;
     if (person[paidField] === 1) {
         throw new Error('This week has already been paid');
     }
@@ -153,7 +154,7 @@ async function payEmployee(familyId, personId, weekNumber, amount) {
 /**
  * Process utility or loan payment
  * @param {number} familyId - Family ID
- * @param {string} billType - 'gas', 'electric', 'phone', 'autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance', 'clothing', 'food', 'quikCash', 'prescriptions'
+ * @param {string} billType - 'gas', 'electric', 'phone', 'autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance', 'clothing', 'food', 'quikCash', 'prescriptions', 'misc_bank', 'misc_supercenter'
  * @param {number} amount - Payment amount
  * @param {number} week - (optional) Week number for food payments (1-4)
  * @returns {object} Updated family data
@@ -164,7 +165,7 @@ async function payBill(familyId, billType, amount, week = null) {
         throw new Error('Invalid parameters for bill payment');
     }
 
-    const validBillTypes = ['gas', 'electric', 'phone', 'autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance', 'clothing', 'food', 'quikCash', 'prescriptions'];
+    const validBillTypes = ['gas', 'electric', 'phone', 'autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance', 'clothing', 'food', 'quikCash', 'prescriptions', 'misc_bank', 'misc_supercenter'];
     if (!validBillTypes.includes(billType)) {
         throw new Error(`Invalid bill type. Must be one of: ${validBillTypes.join(', ')}`);
     }
@@ -199,7 +200,9 @@ async function payBill(familyId, billType, amount, week = null) {
         clothing: 'clothing',
         food: 'food_weekly',
         quikCash: 'misc',
-        prescriptions: 'prescriptions'
+        prescriptions: 'prescriptions',
+        miscBank: 'misc_bank',
+        miscSupercenter: 'misc_supercenter'
     };
 
     const dbField = fieldMap[billType];

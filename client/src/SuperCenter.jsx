@@ -42,7 +42,7 @@ export default function SuperCenter() {
             setSelectedFamily(family)
             setFoodPayment(family?.food_weekly || 0)
             setClothingPayment(family?.clothing || 0)
-            setMiscPayment(family?.misc || 0)
+            setMiscPayment(family?.misc_supercenter || 0)
             setPrescriptionsPayment(family?.prescriptions || 0)
         } else {
             setSelectedFamily(null)
@@ -65,7 +65,7 @@ export default function SuperCenter() {
 
         const amount = billType === 'food' ? Number(foodPayment) :
             billType === 'clothing' ? Number(clothingPayment) :
-                billType === 'misc' ? Number(miscPayment) :
+                billType === 'misc_supercenter' ? Number(miscPayment) :
                     Number(prescriptionsPayment)
 
         if (!amount || amount <= 0) {
@@ -77,7 +77,7 @@ export default function SuperCenter() {
             // Build request body
             const body = {
                 family_id: selectedFamily.id,
-                bill_type: billType === 'misc' ? 'quikCash' : billType,
+                bill_type: billType === 'misc_supercenter' ? 'quikCash' : billType,
                 amount: amount
             }
 
@@ -104,7 +104,7 @@ export default function SuperCenter() {
 
             if (billType === 'food') setFoodPayment(updatedFamily?.food_weekly || 0)
             if (billType === 'clothing') setClothingPayment('')
-            if (billType === 'misc') setMiscPayment('')
+            if (billType === 'misc_supercenter') setMiscPayment('')
             if (billType === 'prescriptions') setPrescriptionsPayment('')
 
             setError(null)
@@ -210,28 +210,28 @@ export default function SuperCenter() {
                                     </div>
                                 )}
 
-                                {selectedFamily.misc > 0 && (
+                                {(typeof selectedFamily.misc_supercenter !== 'undefined' && selectedFamily.misc_supercenter !== null) && (
                                     <div>
                                         <h4>Miscellaneous</h4>
                                         <p>
-                                            ${(selectedFamily.misc || 0).toFixed(2)}
+                                            ${(selectedFamily.misc_supercenter || 0).toFixed(2)}
                                         </p>
                                         <input
                                             type="number"
                                             value={miscPayment}
                                             onChange={(e) => setMiscPayment(e.target.value)}
-                                            disabled={selectedFamily.misc === 0 || selectedFamily.misc === null}
+                                            disabled={selectedFamily.misc_supercenter === 0 || selectedFamily.misc_supercenter === null}
                                         />
                                         <button style={{ marginLeft: 10 }}
                                             onClick={() => handlePayment('misc')}
-                                            disabled={selectedFamily.misc === 0 || selectedFamily.misc === null}
+                                            disabled={selectedFamily.misc_supercenter === 0 || selectedFamily.misc_supercenter === null}
                                         >
-                                            {selectedFamily.misc === 0 ? 'PAID' : 'PAY'}
+                                            {selectedFamily.misc_supercenter === 0 ? 'PAID' : 'PAY'}
                                         </button>
                                     </div>
                                 )}
 
-                                {selectedFamily.prescriptions > 0 && (
+                                {(typeof selectedFamily.prescriptions !== 'undefined' && selectedFamily.prescriptions !== null) && (
                                     <div>
                                         <h4>Prescription?</h4>
                                         <p>
