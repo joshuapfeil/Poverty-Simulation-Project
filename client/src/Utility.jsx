@@ -11,6 +11,7 @@ export default function Utility() {
     const [electricPayment, setElectricPayment] = useState('')
     const { families, loading: familiesLoading, error: familiesError, updateFamily } = useFamilies()
     const [error, setError] = useState(null)
+    const [processingFee, setProcessingFee] = useState(false)
 
     useEffect(() => {
         if (familiesError) setError(familiesError)
@@ -89,6 +90,44 @@ export default function Utility() {
         }
     }
 
+    // Charge a fixed $50 utility service fee (withdraw from family's bank)
+    const handleChargeFee = async () => {
+        setError(null)
+        if (!selectedFamily) {
+            setError('Please select a family')
+            return
+        }
+        const balance = Number(selectedFamily.bank_total || 0)
+        if (balance < 50) {
+            setError('Insufficient funds for $50 fee')
+            return
+        }
+
+        setProcessingFee(true)
+        try {
+            const res = await fetch('/api/transactions/withdraw', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ family_id: selectedFamily.id, amount: 50 })
+            })
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => null)
+                throw new Error(err?.message || `Failed to charge fee (${res.status})`)
+            }
+
+            const json = await res.json()
+            const updatedFamily = json.data
+            setSelectedFamily(updatedFamily)
+            updateFamily(updatedFamily)
+            setError(null)
+        } catch (err) {
+            setError(err.message)
+        } finally {
+            setProcessingFee(false)
+        }
+    }
+
     if (familiesLoading) {
         return <div style={{ padding: 20 }}>Loading Utilities...</div>
     }
@@ -125,74 +164,78 @@ export default function Utility() {
 
                     <p style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
 
+                    <div style={{ marginBottom: '10px' }}>
+                        <button
+                            onClick={handleChargeFee}
+                            disabled={processingFee}
+                            title={Number(selectedFamily.bank_total || 0) < 50 ? 'Clicking will show insufficient funds error' : ''}
+                        >
+                            {processingFee ? 'Processing...' : 'Charge $50 Fee'}
+                        </button>
+                    </div>
+
                     <div className="row">
 
                         <div className="col-md-8">
-                            <div>
-                                <h4>Gas Bill</h4>
-                                <p>
-                                    Amount Owed: ${(selectedFamily.utilities_gas || 0).toFixed(2)}
-                                </p>
-                                <input
-                                    type="number"
-                                    min="0.01"
-                                    max="1000"
-                                    step="0.01"
-                                    value={gasPayment}
-                                    onChange={(e) => setGasPayment(e.target.value)}
-                                    disabled={selectedFamily.utilities_gas === 0 || selectedFamily.utilities_gas === null}
-                                />
-                                <button style={{ marginLeft: 10 }}
-                                    onClick={() => handlePayment('gas')}
-                                    disabled={selectedFamily.utilities_gas === 0 || selectedFamily.utilities_gas === null}
-                                >
-                                    {selectedFamily.utilities_gas === 0 ? 'PAID' : 'PAY'}
-                                </button>
-                            </div>
+                            {selectedFamily.utilities_gas > 0 && (
+                                <div>
+                                    <h4>Gas Bill</h4>
+                                    <p>
+                                        Amount Owed: ${(selectedFamily.utilities_gas || 0).toFixed(2)}
+                                    </p>
+                                    <input
+                                        type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
+                                        value={gasPayment}
+                                        onChange={(e) => setGasPayment(e.target.value)}
+                                    />
+                                    <button style={{ marginLeft: 10 }} onClick={() => handlePayment('gas')}>
+                                        PAY
+                                    </button>
+                                </div>
+                            )}
 
-                            <div>
-                                <h4>Phone Bill</h4>
-                                <p>
-                                    Amount Owed: ${(selectedFamily.utilities_phone || 0).toFixed(2)}
-                                </p>
-                                <input
-                                    type="number"
-                                    min="0.01"
-                                    max="1000"
-                                    step="0.01"
-                                    value={phonePayment}
-                                    onChange={(e) => setPhonePayment(e.target.value)}
-                                    disabled={selectedFamily.utilities_phone === 0 || selectedFamily.utilities_phone === null}
-                                />
-                                <button style={{ marginLeft: 10 }}
-                                    onClick={() => handlePayment('phone')}
-                                    disabled={selectedFamily.utilities_phone === 0 || selectedFamily.utilities_phone === null}
-                                >
-                                    {selectedFamily.utilities_phone === 0 ? 'PAID' : 'PAY'}
-                                </button>
-                            </div>
+                            {selectedFamily.utilities_phone > 0 && (
+                                <div>
+                                    <h4>Phone Bill</h4>
+                                    <p>
+                                        Amount Owed: ${(selectedFamily.utilities_phone || 0).toFixed(2)}
+                                    </p>
+                                    <input
+                                        type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
+                                        value={phonePayment}
+                                        onChange={(e) => setPhonePayment(e.target.value)}
+                                    />
+                                    <button style={{ marginLeft: 10 }} onClick={() => handlePayment('phone')}>
+                                        PAY
+                                    </button>
+                                </div>
+                            )}
 
-                            <div>
-                                <h4>Electric Bill</h4>
-                                <p>
-                                    Amount Owed: ${(selectedFamily.utilities_electric || 0).toFixed(2)}
-                                </p>
-                                <input
-                                    type="number"
-                                    min="0.01"
-                                    max="1000"
-                                    step="0.01"
-                                    value={electricPayment}
-                                    onChange={(e) => setElectricPayment(e.target.value)}
-                                    disabled={selectedFamily.utilities_electric === 0 || selectedFamily.utilities_electric === null}
-                                />
-                                <button style={{ marginLeft: 10 }}
-                                    onClick={() => handlePayment('electric')}
-                                    disabled={selectedFamily.utilities_electric === 0 || selectedFamily.utilities_electric === null}
-                                >
-                                    {selectedFamily.utilities_electric === 0 ? 'PAID' : 'PAY'}
-                                </button>
-                            </div>
+                            {selectedFamily.utilities_electric > 0 && (
+                                <div>
+                                    <h4>Electric Bill</h4>
+                                    <p>
+                                        Amount Owed: ${(selectedFamily.utilities_electric || 0).toFixed(2)}
+                                    </p>
+                                    <input
+                                        type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
+                                        value={electricPayment}
+                                        onChange={(e) => setElectricPayment(e.target.value)}
+                                    />
+                                    <button style={{ marginLeft: 10 }} onClick={() => handlePayment('electric')}>
+                                        PAY
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="col-md-4">

@@ -196,22 +196,20 @@ if (!amount || amount <= 0 || amount > 1000) {
                                             Amount Owed: ${(selectedFamily.clothing || 0).toFixed(2)}
                                         </p>
                                         <input
-                                            type="number"                                            min="0.01"
+                                            type="number"
+                                            min="0.01"
                                             max="1000"
-                                            step="0.01"                                            value={clothingPayment}
+                                            step="0.01"
+                                            value={clothingPayment}
                                             onChange={(e) => setClothingPayment(e.target.value)}
-                                            disabled={selectedFamily.clothing === 0 || selectedFamily.clothing === null}
                                         />
-                                        <button style={{ marginLeft: 10 }}
-                                            onClick={() => handlePayment('clothing')}
-                                            disabled={selectedFamily.clothing === 0 || selectedFamily.clothing === null}
-                                        >
-                                            {selectedFamily.clothing === 0 ? 'PAID' : 'PAY'}
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('clothing')}>
+                                            PAY
                                         </button>
                                     </div>
                                 )}
 
-                                {(typeof selectedFamily.misc_supercenter !== 'undefined' && selectedFamily.misc_supercenter !== null) && (
+                                {selectedFamily.misc_supercenter > 0 && (
                                     <div>
                                         <h4>Miscellaneous</h4>
                                         <p>
@@ -222,18 +220,14 @@ if (!amount || amount <= 0 || amount > 1000) {
                                             max="1000"
                                             step="0.01"                                            value={miscPayment}
                                             onChange={(e) => setMiscPayment(e.target.value)}
-                                            disabled={selectedFamily.misc_supercenter === 0 || selectedFamily.misc_supercenter === null}
                                         />
-                                        <button style={{ marginLeft: 10 }}
-                                            onClick={() => handlePayment('misc')}
-                                            disabled={selectedFamily.misc_supercenter === 0 || selectedFamily.misc_supercenter === null}
-                                        >
-                                            {selectedFamily.misc_supercenter === 0 ? 'PAID' : 'PAY'}
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('misc')}>
+                                            PAY
                                         </button>
                                     </div>
                                 )}
 
-                                {(typeof selectedFamily.prescriptions !== 'undefined' && selectedFamily.prescriptions !== null) && (
+                                {selectedFamily.prescriptions > 0 && (
                                     <div>
                                         <h4>Prescription?</h4>
                                         <p>
@@ -246,13 +240,9 @@ if (!amount || amount <= 0 || amount > 1000) {
                                             step="0.01"
                                             value={prescriptionsPayment}
                                             onChange={(e) => setPrescriptionsPayment(e.target.value)}
-                                            disabled={selectedFamily.prescriptions === 0 || selectedFamily.prescriptions === null}
                                         />
-                                        <button style={{ marginLeft: 10 }}
-                                            onClick={() => handlePayment('prescriptions')}
-                                            disabled={selectedFamily.prescriptions === 0 || selectedFamily.prescriptions === null}
-                                        >
-                                            {selectedFamily.prescriptions === 0 ? 'PAID' : 'PAY'}
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('prescriptions')}>
+                                            PAY
                                         </button>
                                     </div>
                                 )}

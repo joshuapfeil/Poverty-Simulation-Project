@@ -209,7 +209,7 @@ export default function FamilyView() {
                   <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Other Monthly Bills</h4>
                   <div style={{ marginLeft: '20px' }}>
                     {family.student_loans > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Student Loans</b> (Pay to U Trust US National Bank): ${Number(family.student_loans).toFix_supercentered(2)}</p>
+                        <p style={{ margin: '5px 0' }}><b>Student Loans</b> (Pay to U Trust US National Bank): ${Number(family.student_loans).toFixed(2)}</p>
                     )}
                     {family.clothing > 0 && (
                         <p style={{ margin: '5px 0' }}><b>Clothing</b> (Pay to Food-A-Rama Super Center): ${Number(family.clothing).toFixed(2)}</p>

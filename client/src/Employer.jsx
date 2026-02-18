@@ -232,7 +232,7 @@ export default function Employer() {
     // Determine button state and text
     const getButtonState = () => {
         if (!selectedPerson) {
-            return { disabled: true, text: 'Paycheck' }
+            return { disabled: true, text: 'Pay' }
         }
 
         // Support multiple property namings returned by the API
@@ -255,7 +255,7 @@ export default function Employer() {
             return { disabled: true, text: 'Processing...' }
         }
 
-        return { disabled: false, text: 'Paycheck' }
+        return { disabled: false, text: 'Pay' }
     }
 
     const buttonState = getButtonState()

@@ -188,88 +188,80 @@ export default function Bank() {
                                     <button style={{ marginLeft: 10 }} onClick={() => handlePayment('withdraw')}>Withdraw</button>
                                 </div>
 
-                                <div>
-                                    <h4>Auto Loan Payment</h4>
-                                    <p>Amount Owed: ${(selectedFamily.automobile_loan || 0).toFixed(2)}</p>
-                                    <input
-                                        type="number"
-                                        min="0.01"
-                                        max="1000"
-                                        step="0.01"
-                                        value={autoLoanPayment}
-                                        onChange={(e) => setAutoLoanPayment(e.target.value)}
-                                        disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
-                                    />
-                                    <button style={{ marginLeft: 10 }}
-                                        onClick={() => handlePayment('autoLoan')}
-                                        disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
-                                    >
-                                        {selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null ? 'PAID' : 'Pay Auto Loan'}
-                                    </button>
-                                </div>
+                                {selectedFamily.automobile_loan > 0 && (
+                                    <div>
+                                        <h4>Auto Loan Payment</h4>
+                                        <p>Amount Owed: ${(selectedFamily.automobile_loan || 0).toFixed(2)}</p>
+                                        <input
+                                            type="number"
+                                            min="0.01"
+                                            max="1000"
+                                            step="0.01"
+                                            value={autoLoanPayment}
+                                            onChange={(e) => setAutoLoanPayment(e.target.value)}
+                                        />
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('autoLoan')}>
+                                            Pay Auto Loan
+                                        </button>
+                                    </div>
+                                )}
 
                                 <br></br>
 
-                                <div>
-                                    <h4>Student Loan Payment</h4>
-                                    <p>Amount Owed: ${(selectedFamily.student_loans || 0).toFixed(2)}</p>
-                                    <input
-                                        type="number"
-                                        min="0.01"
-                                        max="1000"
-                                        step="0.01"
-                                        value={studentLoanPayment}
-                                        onChange={(e) => setStudentLoanPayment(e.target.value)}
-                                        disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
-                                    />
-                                    <button style={{ marginLeft: 10 }}
-                                        onClick={() => handlePayment('studentLoan')}
-                                        disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
-                                    >
-                                        {selectedFamily.student_loans === 0 || selectedFamily.student_loans === null ? 'PAID' : 'Pay Student Loan'}
-                                    </button>
-                                </div>
+                                {selectedFamily.student_loans > 0 && (
+                                    <div>
+                                        <h4>Student Loan Payment</h4>
+                                        <p>Amount Owed: ${(selectedFamily.student_loans || 0).toFixed(2)}</p>
+                                        <input
+                                            type="number"
+                                            min="0.01"
+                                            max="1000"
+                                            step="0.01"
+                                            value={studentLoanPayment}
+                                            onChange={(e) => setStudentLoanPayment(e.target.value)}
+                                        />
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('studentLoan')}>
+                                            Pay Student Loan
+                                        </button>
+                                    </div>
+                                )}
 
                                 <br></br>
 
-                                <div>
-                                    <h4>Credit Card Payment</h4>
-                                    <p>Amount Owed: ${(selectedFamily.credit_card || 0).toFixed(2)}</p>
-                                    <input
-                                        type="number"
-                                        min="0.01"
-                                        max="1000"
-                                        step="0.01"
-                                        value={creditCardPayment}
-                                        onChange={(e) => setCreditCardPayment(e.target.value)}
-                                        disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
-                                    />
-                                    <button style={{ marginLeft: 10 }}
-                                        onClick={() => handlePayment('creditCard')}
-                                        disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
-                                    >
-                                        {selectedFamily.credit_card === 0 || selectedFamily.credit_card === null ? 'PAID' : 'Pay Credit Card'}
-                                    </button>
-                                </div>
-                                <div>
-                                    <h4>Miscelanious Payments</h4>
-                                    <p>Amount Owed: ${(selectedFamily.misc_bank || 0).toFixed(2)}</p>
-                                    <input
-                                        type="number"
-                                        min="0.01"
-                                        max="1000"
-                                        step="0.01"
-                                        value={miscBankPayment}
-                                        onChange={(e) => setMiscBankPayment(e.target.value)}
-                                        disabled={selectedFamily.misc_bank === 0 || selectedFamily.misc_bank === null}
-                                    />
-                                    <button style={{ marginLeft: 10 }}
-                                        onClick={() => handlePayment('miscBank')}
-                                        disabled={selectedFamily.misc_bank === 0 || selectedFamily.misc_bank === null}
-                                    >
-                                        {selectedFamily.misc_bank === 0 || selectedFamily.misc_bank === null ? 'PAID' : 'Pay Miscellaneous'}
-                                    </button>
-                                </div>
+                                {selectedFamily.credit_card > 0 && (
+                                    <div>
+                                        <h4>Credit Card Payment</h4>
+                                        <p>Amount Owed: ${(selectedFamily.credit_card || 0).toFixed(2)}</p>
+                                        <input
+                                            type="number"
+                                            min="0.01"
+                                            max="1000"
+                                            step="0.01"
+                                            value={creditCardPayment}
+                                            onChange={(e) => setCreditCardPayment(e.target.value)}
+                                        />
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('creditCard')}>
+                                            Pay Credit Card
+                                        </button>
+                                    </div>
+                                )}
+                                {selectedFamily.misc_bank > 0 && (
+                                    <div>
+                                        <h4>Miscelanious Payments</h4>
+                                        <p>Amount Owed: ${(selectedFamily.misc_bank || 0).toFixed(2)}</p>
+                                        <input
+                                            type="number"
+                                            min="0.01"
+                                            max="1000"
+                                            step="0.01"
+                                            value={miscBankPayment}
+                                            onChange={(e) => setMiscBankPayment(e.target.value)}
+                                        />
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('miscBank')}>
+                                            Pay Miscellaneous
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
