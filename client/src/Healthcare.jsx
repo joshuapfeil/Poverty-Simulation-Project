@@ -91,14 +91,14 @@ export default function HealthCare() {
         <div style={{ padding: 20 }} className="container">
             <h1>Community Healthcare</h1>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
 
-            <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+
+            <div style={{ maxWidth: 450, margin: "0 auto" }} className="centered" id="section">
                 <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Family:</label>
                 <select
                     value={selectedFamilyId}
                     onChange={handleFamilySelect}
-                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
+                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', borderRadius: '8px' }}
                 >
                     <option value="">-- Choose a family --</option>
                     {families.map(family => (
@@ -109,27 +109,45 @@ export default function HealthCare() {
                 </select>
             </div>
 
+            <br></br>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
             {selectedFamily && (
-                <div>
+                <div id="section">
                     <h2>{selectedFamily.name}</h2>
 
-                    <p>Bank Balance: ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+                    <p style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
 
-                    <div>
-                        <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
-                            <label style={{ fontWeight: 'bold', marginRight: 10 }}>Insurance:</label>
-                            <select value={selectedInsurance} onChange={handleInsuranceSelect} style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
-                                <option value="80">No Insurance: $80</option>
-                                <option value="40">Medicare $40</option>
-                                <option value="20">Insured $20</option>
-                                <option value="1">Medicaid $1</option>
-                            </select>
-                        </div>
-                
-                        <div className="col-2" style={{ marginTop: 30 }}>
-                            <button onClick={handlePayment} disabled={processing}>{processing ? 'Processing...' : 'Pay Healthcare Bill'}</button>
+
+                    <div className="row">
+                        <div className="col-md-8">
+
+                            <div>
+                                <div>
+                                    <label style={{ fontWeight: 'bold', marginRight: 10 }}>Insurance:</label>
+                                    <select value={selectedInsurance} onChange={handleInsuranceSelect} style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', borderRadius: '8px' }}>
+                                        <option value="80">Uninsured: $80</option>
+                                        <option value="40">Medicare $40</option>
+                                        <option value="20">Insured $20</option>
+                                        <option value="1">Medicaid $1</option>
+                                    </select>
+                                </div>
+
+                                <div style={{ marginTop: 30 }}>
+                                    <button onClick={handlePayment} disabled={processing}>{processing ? 'Processing...' : 'Pay Healthcare Bill'}</button>
+                                </div>
+
+                            </div>
                         </div>
 
+                        <div className="col-md-4">
+                            <br></br>
+                            <p id="helptext">*<u>Before</u> treating patients, ask them for proof of insurance.
+                                <br></br><br></br>
+                                *If they do not have insurance, or are unsure of their status, charge them as <u>uninsured</u>.
+                            </p>
+                        </div>
                     </div>
                 </div>
             )}

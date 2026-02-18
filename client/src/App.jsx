@@ -34,8 +34,9 @@ function Home() {
     <div>
       <img src={BannerImage}></img>
       <div className="centered" style={{ padding: 20 }}>
-        <p style={{ padding: 20 }}>In partnership between the Boise State Nursing program and the Games, Interactive Media and Mobile program, a digitized version of Missouri Community Action's Poverty Simulation. Please press the BEGIN button when the instructor says to.</p>
-        <p style={{ padding: 10 }}> <Link to="/login"><button>Begin</button></Link></p>
+        <p style={{ padding: 20 }}>Welcome to the digital banking system for Boise State University's Poverty Simulation. <br></br>This system was created in partnership between the Nursing program and the Games, Interactive Media and Mobile program.</p>
+        <p style={{ padding: 20 }}>Please press BEGIN when instructed.</p>
+        <p style={{ padding: 10 }}> <Link to="/login"><button>BEGIN</button></Link></p>
       </div>
     </div>
   )

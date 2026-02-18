@@ -62,7 +62,7 @@ export default function QuikCash() {
             }
         }
 
-        
+
 
         try {
             const res = await fetch(`/families/${selectedFamily.id}`, {
@@ -86,9 +86,9 @@ export default function QuikCash() {
             setSelectedFamily(updatedFamily)
             updateFamily(updatedFamily)
 
-           
 
-            
+
+
             if (billType === 'withdraw') setWithdrawAmount('')
 
             setError(null)
@@ -105,14 +105,14 @@ export default function QuikCash() {
         <div style={{ padding: 20 }} className='container'>
             <h1>QuikCash</h1>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
 
-            <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+
+            <div style={{ maxWidth: 450, margin: "0 auto" }} className="centered" id="section">
                 <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Family:</label>
                 <select
                     value={selectedFamilyId}
                     onChange={handleFamilySelect}
-                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
+                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', borderRadius: '8px' }}>
 
                     <option value="">-- Choose a family --</option>
                     {families.map(family => (
@@ -123,27 +123,45 @@ export default function QuikCash() {
                 </select>
             </div>
 
+            <br></br>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
             {selectedFamily && (
-                <div>
+                <div id="section">
                     <h2>{selectedFamily.name}</h2>
-                    <p>Bank Balance: ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+                    <p style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
 
-                    <div>
-                        
+                    <div className="row">
+                        <div className="col-md-8">
 
-                        <div>
-                            <h4>Travel Tickets</h4>
-                            <input
-                                type="number"
-                                value={withdrawAmount}
-                                onChange={(e) => setWithdrawAmount(e.target.value)}
-                                placeholder="Enter amount"
-                            />
-                            <button onClick={() => handlePayment('withdraw')}>Withdraw</button>
+
+                            <div>
+                                <div>
+                                    <h4>Buy Transportation Passes</h4>
+                                    <input
+                                        type="number"
+                                        value={withdrawAmount}
+                                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                                        placeholder="Enter amount"
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('withdraw')}>Buy</button>
+                                </div>
+                            </div>
                         </div>
-
-                        
+                        <div className="col-md-4">
+                            <br></br>
+                            <p id="helptext">
+                                *Each transportation pass is worth $1. There are <u>no</u> discounts or special deals.
+                                <br></br><br></br>
+                                *Families that wish to cash checks will receive their payment in <u>cash only</u>.
+                                <br></br><br></br>
+                                *Families that are granted a payday loan will receive that loan in <u>cash only</u>.
+                            </p>
+                        </div>
                     </div>
+
                 </div>
             )}
         </div>

@@ -67,7 +67,7 @@ export default function Login() {
         <form className="centered" id="login" onSubmit={handleLogin}>
           <br></br>
           <p>
-            Username: 
+            Username:{" "}
             <input 
               type="text" 
               value={username}
@@ -84,14 +84,6 @@ export default function Login() {
           <br></br><br></br>
         </form>
       </div>
-
-      {/* <hr></hr>
-      <p>Dev buttons:</p>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <Link to="/family"><button>Family</button></Link>
-        <Link to="/community"><button>Community</button></Link>
-        <Link to="/admin"><button>Admin</button></Link>
-      </div> */}
     
     </div>
   )

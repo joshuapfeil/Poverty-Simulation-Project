@@ -97,14 +97,13 @@ export default function Mortgage() {
         <div style={{ padding: 20 }} className="container">
             <h1>Sweaney Mortgage & Realty</h1>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
 
-            <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+            <div style={{ maxWidth: 450, margin: "0 auto" }} className="centered" id="section">
                 <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Family:</label>
                 <select
                     value={selectedFamilyId}
                     onChange={handleFamilySelect}
-                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
+                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', borderRadius: '8px' }}
                 >
                     <option value="">-- Choose a family --</option>
                     {families
@@ -117,67 +116,86 @@ export default function Mortgage() {
                 </select>
             </div>
 
+            <br></br>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
             {selectedFamily && (
-                <div>
+                <div id="section">
                     <h2>{selectedFamily.name}</h2>
-                    <p>Bank Balance: ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+                    <p style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
 
-                    <div>
-                        <div>
-                            <h4>Mortgage Payment</h4>
-                            <p>
-                                ${(selectedFamily.housing_mortgage || 0).toFixed(2)}
-                            </p>
-                            <input
-                                type="number"
-                                value={mortgagePayment}
-                                onChange={(e) => setMortgagePayment(e.target.value)}
-                                disabled={(selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null)}
-                            />
-                            <button
-                                onClick={() => handlePayment('mortgage')}
-                                disabled={selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null}
-                            >
-                                {selectedFamily.housing_mortgage === 0 ? 'PAID' : 'PAY'}
-                            </button>
+                    <div className="row">
+                        <div className="col-md-8">
+
+
+                            <div>
+                                <div>
+                                    <h4>Mortgage Payment</h4>
+                                    <p>
+                                        Amount Owed: ${(selectedFamily.housing_mortgage || 0).toFixed(2)}
+                                    </p>
+                                    <input
+                                        type="number"
+                                        value={mortgagePayment}
+                                        onChange={(e) => setMortgagePayment(e.target.value)}
+                                        disabled={(selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null)}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('mortgage')}
+                                        disabled={selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null}
+                                    >
+                                        {selectedFamily.housing_mortgage === 0 ? 'PAID' : 'PAY'}
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <h4>Property Taxes</h4>
+                                    <p>
+                                        Amount Owed: ${(selectedFamily.housing_taxes || 0).toFixed(2)}
+                                    </p>
+                                    <input
+                                        type="number"
+                                        value={taxesPayment}
+                                        onChange={(e) => setTaxesPayment(e.target.value)}
+                                        disabled={selectedFamily.housing_taxes === 0 || selectedFamily.housing_taxes === null}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('taxes')}
+                                        disabled={selectedFamily.housing_taxes === 0 || selectedFamily.housing_taxes === null}
+                                    >
+                                        {selectedFamily.housing_taxes === 0 ? 'PAID' : 'PAY'}
+                                    </button>
+                                </div>
+
+                                <div>
+                                    <h4>Maintenance</h4>
+                                    <p>
+                                        Amount Owed: ${(selectedFamily.housing_maintenance || 0).toFixed(2)}
+                                    </p>
+                                    <input
+                                        type="number"
+                                        value={maintenancePayment}
+                                        onChange={(e) => setMaintenancePayment(e.target.value)}
+                                        disabled={selectedFamily.housing_maintenance === 0 || selectedFamily.housing_maintenance === null}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('maintenance')}
+                                        disabled={selectedFamily.housing_maintenance === 0 || selectedFamily.housing_maintenance === null}
+                                    >
+                                        {selectedFamily.housing_maintenance === 0 ? 'PAID' : 'PAY'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-
-                        <div>
-                            <h4>Property Taxes</h4>
-                            <p>
-                                ${(selectedFamily.housing_taxes || 0).toFixed(2)}
+                        <div className="col-md-4">
+                            <br></br>
+                            <p id="helptext">*Families may make their payments in partial installments during Weeks 1 and 2.
+                                <br></br><br></br>
+                                *During Weeks 3 and 4, demand the remaining total. 
+                                <br></br><br></br>
+                                *Do <u>NOT</u> take any payments without a family member present.
                             </p>
-                            <input
-                                type="number"
-                                value={taxesPayment}
-                                onChange={(e) => setTaxesPayment(e.target.value)}
-                                disabled={selectedFamily.housing_taxes === 0 || selectedFamily.housing_taxes === null}
-                            />
-                            <button
-                                onClick={() => handlePayment('taxes')}
-                                disabled={selectedFamily.housing_taxes === 0 || selectedFamily.housing_taxes === null}
-                            >
-                                {selectedFamily.housing_taxes === 0 ? 'PAID' : 'PAY'}
-                            </button>
-                        </div>
-
-                        <div>
-                            <h4>Maintenance</h4>
-                            <p>
-                                ${(selectedFamily.housing_maintenance || 0).toFixed(2)}
-                            </p>
-                            <input
-                                type="number"
-                                value={maintenancePayment}
-                                onChange={(e) => setMaintenancePayment(e.target.value)}
-                                disabled={selectedFamily.housing_maintenance === 0 || selectedFamily.housing_maintenance === null}
-                            />
-                            <button
-                                onClick={() => handlePayment('maintenance')}
-                                disabled={selectedFamily.housing_maintenance === 0 || selectedFamily.housing_maintenance === null}
-                            >
-                                {selectedFamily.housing_maintenance === 0 ? 'PAID' : 'PAY'}
-                            </button>
                         </div>
                     </div>
                 </div>

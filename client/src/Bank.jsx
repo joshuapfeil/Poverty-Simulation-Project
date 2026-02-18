@@ -52,11 +52,11 @@ export default function Bank() {
         }
 
         const amount = billType === 'deposit' ? Number(depositAmount) :
-                    billType === 'withdraw' ? Number(withdrawAmount) :
-                    billType === 'autoLoan' ? Number(autoLoanPayment) :
+            billType === 'withdraw' ? Number(withdrawAmount) :
+                billType === 'autoLoan' ? Number(autoLoanPayment) :
                     billType === 'studentLoan' ? Number(studentLoanPayment) :
-                    billType === 'creditCard' ? Number(creditCardPayment) :
-                    0
+                        billType === 'creditCard' ? Number(creditCardPayment) :
+                            0
 
         if (!amount || amount <= 0) {
             setError('Please enter a valid amount')
@@ -116,21 +116,19 @@ export default function Bank() {
     }
 
     if (familiesLoading) {
-        return <div style={{ padding: 20 }}>Loading Bank...</div>
+        return <div style={{ padding: 20 }}>Loading U Trust US National Bank...</div>
     }
 
     return (
         <div style={{ padding: 20 }} className='container'>
             <h1>U Trust US National Bank</h1>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-
-            <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+            <div style={{ maxWidth: 450, margin: "0 auto" }} className="centered" id="section" >
                 <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Family:</label>
                 <select
                     value={selectedFamilyId}
                     onChange={handleFamilySelect}
-                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}>
+                    style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '16px', minWidth: '250px' }}>
 
                     <option value="">-- Choose a family --</option>
                     {families.map(family => (
@@ -140,103 +138,116 @@ export default function Bank() {
                     ))}
                 </select>
             </div>
+            <br></br>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
 
             {selectedFamily && (
-                <div>
+                <div id="section">
                     <h2>{selectedFamily.name}</h2>
-                    <p>Bank Balance: ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+                    <p style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
 
-                    <div>
-                        <div>
-                            <h4>Deposit</h4>
-                            <input
-                                type="number"
-                                value={depositAmount}
-                                onChange={(e) => setDepositAmount(e.target.value)}
-                                placeholder="Enter amount"
-                            />
-                            <button onClick={() => handlePayment('deposit')}>Deposit</button>
+                    <div className="row">
+                        <div className="col-md-8">
+
+
+                            <div>
+                                <div>
+                                    <h4>Deposit</h4>
+                                    <input
+                                        type="number"
+                                        value={depositAmount}
+                                        onChange={(e) => setDepositAmount(e.target.value)}
+                                        placeholder="Enter amount"
+                                    />
+                                    <button style={{ marginLeft: 10 }} onClick={() => handlePayment('deposit')}>Deposit</button>
+                                </div>
+                                <br></br>
+
+                                <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+                                    <h4>Withdraw</h4>
+                                    <input
+                                        type="number"
+                                        value={withdrawAmount}
+                                        onChange={(e) => setWithdrawAmount(e.target.value)}
+                                        placeholder="Enter amount"
+                                    />
+                                    <button style={{ marginLeft: 10 }} onClick={() => handlePayment('withdraw')}>Withdraw</button>
+                                </div>
+
+                                <div>
+                                    <h4>Auto Loan Payment</h4>
+                                    <p>Amount Owed: ${(selectedFamily.automobile_loan || 0).toFixed(2)}</p>
+                                    <input
+                                        type="number"
+                                        value={autoLoanPayment}
+                                        onChange={(e) => setAutoLoanPayment(e.target.value)}
+                                        disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('autoLoan')}
+                                        disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
+                                    >
+                                        {selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null ? 'PAID' : 'Pay Auto Loan'}
+                                    </button>
+                                </div>
+
+                                <br></br>
+
+                                <div>
+                                    <h4>Student Loan Payment</h4>
+                                    <p>Amount Owed: ${(selectedFamily.student_loans || 0).toFixed(2)}</p>
+                                    <input
+                                        type="number"
+                                        value={studentLoanPayment}
+                                        onChange={(e) => setStudentLoanPayment(e.target.value)}
+                                        disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('studentLoan')}
+                                        disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
+                                    >
+                                        {selectedFamily.student_loans === 0 || selectedFamily.student_loans === null ? 'PAID' : 'Pay Student Loan'}
+                                    </button>
+                                </div>
+
+                                <br></br>
+
+                                <div>
+                                    <h4>Credit Card Payment</h4>
+                                    <p>Amount Owed: ${(selectedFamily.credit_card || 0).toFixed(2)}</p>
+                                    <input
+                                        type="number"
+                                        value={creditCardPayment}
+                                        onChange={(e) => setCreditCardPayment(e.target.value)}
+                                        disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('creditCard')}
+                                        disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
+                                    >
+                                        {selectedFamily.credit_card === 0 || selectedFamily.credit_card === null ? 'PAID' : 'Pay Credit Card'}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <h4>Withdraw</h4>
-                            <input
-                                type="number"
-                                value={withdrawAmount}
-                                onChange={(e) => setWithdrawAmount(e.target.value)}
-                                placeholder="Enter amount"
-                            />
-                            <button onClick={() => handlePayment('withdraw')}>Withdraw</button>
+                        <div className="col-md-4">
+                            <br></br>
+                            <p id="helptext">*Cash, checks, and TANF balances on EBT cards can be deposited into bank accounts.
+                                <br></br> <br></br>
+                                *Checks and TANF can also be exchanged directly for cash without needing to deposit or withdraw.
+                                <br></br> <br></br>
+                                *Food stamps may <u>NOT</u> be deposited or exchanged for cash.
+                                <br></br><br></br>
+                                *Do <u>NOT</u> make a loan payment without a family member present.
+                            </p>
                         </div>
 
-                        <div>
-                            <h4>Auto Loan Payment</h4>
-                            <p>Amount Owed: ${(selectedFamily.automobile_loan || 0).toFixed(2)}</p>
-                            <input
-                                type="number"
-                                value={autoLoanPayment}
-                                onChange={(e) => setAutoLoanPayment(e.target.value)}
-                                disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
-                                style={{
-                                    backgroundColor: (selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null) 
-                                        ? '#e0e0e0' 
-                                        : 'white'
-                                }}
-                            />
-                            <button 
-                                onClick={() => handlePayment('autoLoan')}
-                                disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
-                            >
-                                {selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null ? 'PAID' : 'Pay Auto Loan'}
-                            </button>
-                        </div>
-
-                        <div>
-                            <h4>Student Loan Payment</h4>
-                            <p>Amount Owed: ${(selectedFamily.student_loans || 0).toFixed(2)}</p>
-                            <input
-                                type="number"
-                                value={studentLoanPayment}
-                                onChange={(e) => setStudentLoanPayment(e.target.value)}
-                                disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
-                                style={{
-                                    backgroundColor: (selectedFamily.student_loans === 0 || selectedFamily.student_loans === null) 
-                                        ? '#e0e0e0' 
-                                        : 'white'
-                                }}
-                            />
-                            <button 
-                                onClick={() => handlePayment('studentLoan')}
-                                disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
-                            >
-                                {selectedFamily.student_loans === 0 || selectedFamily.student_loans === null ? 'PAID' : 'Pay Student Loan'}
-                            </button>
-                        </div>
-
-                        <div>
-                            <h4>Credit Card Payment</h4>
-                            <p>Amount Owed: ${(selectedFamily.credit_card || 0).toFixed(2)}</p>
-                            <input
-                                type="number"
-                                value={creditCardPayment}
-                                onChange={(e) => setCreditCardPayment(e.target.value)}
-                                disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
-                                style={{
-                                    backgroundColor: (selectedFamily.credit_card === 0 || selectedFamily.credit_card === null) 
-                                        ? '#e0e0e0' 
-                                        : 'white'
-                                }}
-                            />
-                            <button 
-                                onClick={() => handlePayment('creditCard')}
-                                disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
-                            >
-                                {selectedFamily.credit_card === 0 || selectedFamily.credit_card === null ? 'PAID' : 'Pay Credit Card'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
+                    </div >
+                </div >
+            )
+            }
+        </div >
     )
 }

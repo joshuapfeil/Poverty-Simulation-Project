@@ -11,24 +11,24 @@ export default function FamiliesAdmin() {
   const [families, setFamilies] = useState([])
   const [name, setName] = useState('')
   const [bankTotal, setBankTotal] = useState('')
-  
+
   // Housing bills
   const [housingMortgage, setHousingMortgage] = useState('')
   const [housingTaxes, setHousingTaxes] = useState('')
   const [housingMaintenance, setHousingMaintenance] = useState('')
-  
+
   // Utilities bills
   const [utilitiesGas, setUtilitiesGas] = useState('')
   const [utilitiesElectric, setUtilitiesElectric] = useState('')
   const [utilitiesPhone, setUtilitiesPhone] = useState('')
-  
+
   // Other bills
   const [studentLoans, setStudentLoans] = useState('')
   const [foodWeekly, setFoodWeekly] = useState('')
   const [clothing, setClothing] = useState('')
   const [creditCard, setCreditCard] = useState('')
   const [automobileLoan, setAutomobileLoan] = useState('')
-  
+
   // Edit state
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
@@ -44,7 +44,7 @@ export default function FamiliesAdmin() {
   const [editClothing, setEditClothing] = useState('')
   const [editCreditCard, setEditCreditCard] = useState('')
   const [editAutomobileLoan, setEditAutomobileLoan] = useState('')
-  
+
   const [showPeople, setShowPeople] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -73,8 +73,8 @@ export default function FamiliesAdmin() {
       const res = await fetch('/families/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name, 
+        body: JSON.stringify({
+          name,
           bank_total: Number(bankTotal) || 0,
           housing_mortgage: Number(housingMortgage) || 0,
           housing_taxes: Number(housingTaxes) || 0,
@@ -95,7 +95,7 @@ export default function FamiliesAdmin() {
       }
       const json = await res.json()
       setFamilies(json.data || [])
-      
+
       // Reset all form fields
       setName('')
       setBankTotal('')
@@ -168,8 +168,8 @@ export default function FamiliesAdmin() {
       const res = await fetch(`/families/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          name: editName, 
+        body: JSON.stringify({
+          name: editName,
           bank_total: Number(editBank) || 0,
           housing_mortgage: Number(editHousingMortgage) || 0,
           housing_taxes: Number(editHousingTaxes) || 0,
@@ -223,29 +223,34 @@ export default function FamiliesAdmin() {
   return (
     <div style={{ padding: 20 }}>
       <h1>Admin – Families</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <form onSubmit={handleAdd} style={{ marginBottom: 20, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+
+      <form id="section" onSubmit={handleAdd} style={{ marginBottom: 20, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+
         <h3>Add New Family</h3>
-        
-        <div style={{ marginBottom: 15 }}>
-          <label style={{ display: 'block', fontWeight: 'bold' }}>Family Name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} style={{ width: '300px' }} required />
+
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+
+        <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, }}>
+          <div style={{ marginBottom: 15, }}>
+            <label style={{ display: 'block', fontWeight: 'bold' }}>Family Name: </label>
+            <input value={name} onChange={(e) => setName(e.target.value)} style={{ width: '100%' }} required />
+          </div>
+
+          <div style={{ marginBottom: 15 }}>
+            <label style={{ display: 'block', fontWeight: 'bold' }}>Bank Total: </label>
+            <input type="number" step="0.01" value={bankTotal} onChange={(e) => setBankTotal(e.target.value)} style={{ width: '100%' }} />
+          </div>
         </div>
 
-        <div style={{ marginBottom: 15 }}>
-          <label style={{ display: 'block', fontWeight: 'bold' }}>Bank Total</label>
-          <input type="number" step="0.01" value={bankTotal} onChange={(e) => setBankTotal(e.target.value)} style={{ width: '200px' }} />
-        </div>
+        <br></br>
 
-        <h4>Monthly Bills</h4>
-        
         {/* Housing Section */}
         <fieldset style={{ marginBottom: 15, padding: 10, border: '1px solid #ddd' }}>
-          <legend style={{ fontWeight: 'bold' }}>Housing (Pay to mortgage & realty co.)</legend>
+          <legend style={{ fontWeight: 'bold' }}>Housing (Pay to Sweaney Mortgage & Realty)</legend>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label>Mortgage:</label>
+              <label>Mortgage/Rent:</label>
               <input type="number" step="0.01" value={housingMortgage} onChange={(e) => setHousingMortgage(e.target.value)} placeholder="$500.00" style={{ width: '100%' }} />
             </div>
             <div>
@@ -261,7 +266,7 @@ export default function FamiliesAdmin() {
 
         {/* Utilities Section */}
         <fieldset style={{ marginBottom: 15, padding: 10, border: '1px solid #ddd' }}>
-          <legend style={{ fontWeight: 'bold' }}>Utilities (Pay to utility company)</legend>
+          <legend style={{ fontWeight: 'bold' }}>Utilities (Pay to Friendly Utility Company)</legend>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
               <label>Gas:</label>
@@ -279,28 +284,31 @@ export default function FamiliesAdmin() {
         </fieldset>
 
         {/* Other Bills */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15, marginBottom: 15 }}>
-          <div>
-            <label style={{ fontWeight: 'bold' }}>Student Loans (Pay to bank):</label>
-            <input type="number" step="0.01" value={studentLoans} onChange={(e) => setStudentLoans(e.target.value)} placeholder="$100.00" style={{ width: '100%' }} />
+        <fieldset style={{ marginBottom: 15, padding: 10, border: '1px solid #ddd' }}>
+          <legend style={{ fontWeight: 'bold' }}>Other Bills</legend>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15, marginBottom: 15 }}>
+            <div>
+              <label>Student Loans:</label>
+              <input type="number" step="0.01" value={studentLoans} onChange={(e) => setStudentLoans(e.target.value)} placeholder="$100.00" style={{ width: '100%' }} />
+            </div>
+            <div>
+              <label>Food - Weekly:</label>
+              <input type="number" step="0.01" value={foodWeekly} onChange={(e) => setFoodWeekly(e.target.value)} placeholder="$110.00" style={{ width: '100%' }} />
+            </div>
+            <div>
+              <label>Clothing:</label>
+              <input type="number" step="0.01" value={clothing} onChange={(e) => setClothing(e.target.value)} placeholder="$40.00" style={{ width: '100%' }} />
+            </div>
+            <div>
+              <label>Credit Card Minimum:</label>
+              <input type="number" step="0.01" value={creditCard} onChange={(e) => setCreditCard(e.target.value)} placeholder="$150.00" style={{ width: '100%' }} />
+            </div>
+            <div>
+              <label>Automobile Loan:</label>
+              <input type="number" step="0.01" value={automobileLoan} onChange={(e) => setAutomobileLoan(e.target.value)} placeholder="$250.00" style={{ width: '100%' }} />
+            </div>
           </div>
-          <div>
-            <label style={{ fontWeight: 'bold' }}>Food (Pay to super center) - Weekly:</label>
-            <input type="number" step="0.01" value={foodWeekly} onChange={(e) => setFoodWeekly(e.target.value)} placeholder="$110.00" style={{ width: '100%' }} />
-          </div>
-          <div>
-            <label style={{ fontWeight: 'bold' }}>Clothing (Pay to super center):</label>
-            <input type="number" step="0.01" value={clothing} onChange={(e) => setClothing(e.target.value)} placeholder="$40.00" style={{ width: '100%' }} />
-          </div>
-          <div>
-            <label style={{ fontWeight: 'bold' }}>Credit Card Minimum (Pay to bank):</label>
-            <input type="number" step="0.01" value={creditCard} onChange={(e) => setCreditCard(e.target.value)} placeholder="$150.00" style={{ width: '100%' }} />
-          </div>
-          <div>
-            <label style={{ fontWeight: 'bold' }}>Automobile Loan (Pay to bank):</label>
-            <input type="number" step="0.01" value={automobileLoan} onChange={(e) => setAutomobileLoan(e.target.value)} placeholder="$250.00" style={{ width: '100%' }} />
-          </div>
-        </div>
+        </fieldset>
 
         <button type="submit" style={{ padding: '10px 20px', fontSize: '16px' }}>Add Family</button>
       </form>
@@ -330,7 +338,7 @@ export default function FamiliesAdmin() {
                         <label style={{ fontWeight: 'bold' }}>Bank Total:</label>
                         <input value={editBank} onChange={(e) => setEditBank(e.target.value)} type="number" step="0.01" style={{ marginLeft: 8, width: '200px' }} />
                       </div>
-                      
+
                       <h4>Bills</h4>
                       <fieldset style={{ marginBottom: 10, padding: 10 }}>
                         <legend>Housing</legend>
@@ -340,7 +348,7 @@ export default function FamiliesAdmin() {
                           <input value={editHousingMaintenance} onChange={(e) => setEditHousingMaintenance(e.target.value)} placeholder="Maintenance" type="number" step="0.01" />
                         </div>
                       </fieldset>
-                      
+
                       <fieldset style={{ marginBottom: 10, padding: 10 }}>
                         <legend>Utilities</legend>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
@@ -349,7 +357,7 @@ export default function FamiliesAdmin() {
                           <input value={editUtilitiesPhone} onChange={(e) => setEditUtilitiesPhone(e.target.value)} placeholder="Phone" type="number" step="0.01" />
                         </div>
                       </fieldset>
-                      
+
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                         <input value={editStudentLoans} onChange={(e) => setEditStudentLoans(e.target.value)} placeholder="Student Loans" type="number" step="0.01" />
                         <input value={editFoodWeekly} onChange={(e) => setEditFoodWeekly(e.target.value)} placeholder="Food (weekly)" type="number" step="0.01" />

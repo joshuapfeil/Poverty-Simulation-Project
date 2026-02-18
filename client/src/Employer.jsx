@@ -230,85 +230,114 @@ export default function Employer() {
     const buttonState = getButtonState()
 
     return (
-        <div style={{ padding: 20 }}>
+        <div style={{ padding: 20 }} className="container">
             <h1>General Employer</h1>
-            <div className="container">
-                <div className="row">
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
 
-                    <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
-                        <label style={{ fontWeight: 'bold', marginRight: 10 }}>Name</label>
-                        <select
-                            value={selectedPersonId}
-                            onChange={handlePersonSelect}
-                            style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
-                        >
-                            <option value="">-- Select Employee --</option>
-                            {familyPeople.map(person => (
-                                <option key={person.id} value={person.id}>
-                                    {person.first_name} {person.last_name}
-                                </option>
-                            ))}
-                        </select>
+            <div style={{ maxWidth: 450, margin: "0 auto" }} className="centered" id="section">
+                <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Employee</label>
+                <select
+                    value={selectedPersonId}
+                    onChange={handlePersonSelect}
+                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', borderRadius: '8px' }}
+                >
+                    <option value="">-- Select Employee --</option>
+                    {familyPeople.map(person => (
+                        <option key={person.id} value={person.id}>
+                            {person.first_name} {person.last_name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <br></br>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+
+            {selectedPerson && selectedFamily && (
+                <div id='section'>
+                    <div>
+                        <h2>{selectedFamily.name}</h2>
+                        <p style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
                     </div>
 
-                    {selectedPerson && selectedFamily && (
-                        <div style={{ marginBottom: 20 }}>
-                            <p><strong>Family:</strong> {selectedFamily.name}</p>
-                            <p><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+                    <div className="row">
+                        <div className="col-md-8">
+                            <div>
+                                <label style={{ fontWeight: 'bold', marginRight: 10 }}>Week:</label>
+                                <select
+                                    value={selectedWeek}
+                                    onChange={handleWeekSelect}
+                                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', borderRadius: '8px' }}
+                                >
+                                    <option value="1">Week 1</option>
+                                    <option value="2">Week 2</option>
+                                    <option value="3">Week 3</option>
+                                    <option value="4">Week 4</option>
+                                </select>
+                            </div>
+                            <br></br>
+
+                            {selectedPerson && (
+                                <div style={{ marginBottom: 20 }}>
+                                    <p><strong>Week {selectedWeek} Pay:</strong> ${getWeekPay(selectedPerson, selectedWeek).toFixed(2)}</p>
+                                </div>
+                            )}
+
+                            <div className="row">
+
+                                <div className="col-auto">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={onLeaveChecked}
+                                            onChange={handleOnLeaveChange}
+                                            disabled={!selectedPerson}
+                                            style={{ marginRight: '8px' }}
+                                        />
+                                        On Leave
+                                    </label>
+
+                                </div>
+
+                                <div className="col-auto">
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            checked={firedChecked}
+                                            onChange={handleFiredChange}
+                                            disabled={!selectedPerson}
+                                            style={{ marginRight: '8px' }}
+                                        />
+                                        Fired
+                                    </label>
+                                </div>
+                            </div>
+
+                            <br></br>
+                            <div >
+                                <button
+                                    onClick={handlePayment}
+                                    disabled={buttonState.disabled}
+                                >
+                                    {buttonState.text}
+                                </button>
+                            </div>
+
                         </div>
-                    )}
-
-                    <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20 }}>
-                        <label style={{ fontWeight: 'bold', marginRight: 10 }}>Week:</label>
-                        <select
-                            value={selectedWeek}
-                            onChange={handleWeekSelect}
-                            style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
-                        >
-                            <option value="1">Week 1</option>
-                            <option value="2">Week 2</option>
-                            <option value="3">Week 3</option>
-                            <option value="4">Week 4</option>
-                        </select>
-                    </div>
-
-                    {selectedPerson && (
-                        <div style={{ marginBottom: 20 }}>
-                            <p><strong>Week {selectedWeek} Pay:</strong> ${getWeekPay(selectedPerson, selectedWeek).toFixed(2)}</p>
+                        <div className="col-md-4">
+                            <br></br>
+                            <p id="helptext">*Employees that are on leave <u>do not get paid</u> for the weeks they are absent. Employees who are fired do not get paid for the rest of the simulation, unless they are re-hired.
+                                <br></br><br></br>
+                                *Any and all new hires, regardless of bank account status, are paid using <u>paper checks</u>.
+                                <br></br><br></br>
+                                *Do <u>NOT</u> pay an employee until they have clocked out for the week.
+                            </p>
                         </div>
-                    )}
 
-                    <div className="col-2">
-                        <p>On Leave</p>
-                        <input
-                            type="checkbox"
-                            checked={onLeaveChecked}
-                            onChange={handleOnLeaveChange}
-                            disabled={!selectedPerson}
-                        />
-                    </div>
-
-                    <div className="col-2">
-                        <p>Fired</p>
-                        <input
-                            type="checkbox"
-                            checked={firedChecked}
-                            onChange={handleFiredChange}
-                            disabled={!selectedPerson}
-                        />
-                    </div>
-
-                    <div className="col-2" style={{ marginTop: 30 }}>
-                        <button
-                            onClick={handlePayment}
-                            disabled={buttonState.disabled}
-                        >
-                            {buttonState.text}
-                        </button>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }

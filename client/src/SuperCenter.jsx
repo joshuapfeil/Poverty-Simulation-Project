@@ -114,7 +114,7 @@ export default function SuperCenter() {
     }
 
     if (familiesLoading) {
-        return <div style={{ padding: 20 }}>Loading SuperCenter...</div>
+        return <div style={{ padding: 20 }}>Loading Food-A-Rama Super Center...</div>
     }
 
     // Check if current week is paid
@@ -125,14 +125,12 @@ export default function SuperCenter() {
         <div style={{ padding: 20 }} className="container">
             <h1>Food-A-Rama SuperCenter</h1>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-
-            <div style={{ marginBottom: 30, border: '1px solid #ccc', padding: 20, backgroundColor: '#f9f9f9' }}>
+            <div style={{ maxWidth: 450, margin: "0 auto" }} className="centered" id="section">
                 <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Family:</label>
                 <select
                     value={selectedFamilyId}
                     onChange={handleFamilySelect}
-                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', color: '#333' }}
+                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '250px', borderRadius: '8px' }}
                 >
                     <option value="">-- Choose a family --</option>
                     {families.map(family => (
@@ -142,108 +140,126 @@ export default function SuperCenter() {
                     ))}
                 </select>
             </div>
+            <br></br>
+
+            {error && <p style={{ color: 'red' }}>{error}</p>}
 
             {selectedFamily && (
-                <div>
+                <div id="section">
                     <h2>{selectedFamily.name}</h2>
-                    <p>Bank Balance: ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
+                    <p style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}><strong>Bank Balance:</strong> ${(selectedFamily.bank_total || 0).toFixed(2)}</p>
 
-                    <div style={{ marginBottom: 20, border: '1px solid #ccc', padding: 20, backgroundColor: '#f0f0f0' }}>
-                        <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Week:</label>
-                        <select
-                            value={selectedWeek}
-                            onChange={handleWeekSelect}
-                            style={{ padding: '8px 12px', fontSize: '16px', minWidth: '150px', color: '#333' }}
-                        >
-                            <option value="1">Week 1</option>
-                            <option value="2">Week 2</option>
-                            <option value="3">Week 3</option>
-                            <option value="4">Week 4</option>
-                        </select>
-                    </div>
+                    <div className="row">
+                        <div className="col-md-8">
 
-                    <div>
-                        <div>
-                            <h4>Food - Week {selectedWeek}</h4>
-                            <p>
-                                ${(selectedFamily.food_weekly || 0).toFixed(2)}
-                            </p>
-                            <input
-                                type="number"
-                                value={foodPayment}
-                                onChange={(e) => setFoodPayment(e.target.value)}
-                                disabled={isWeekPaid}
-                            />
-                            <button
-                                onClick={() => handlePayment('food')}
-                                disabled={isWeekPaid}
-                            >
-                                {isWeekPaid ? 'PAID' : 'PAY'}
-                            </button>
+
+                            <div>
+                                <label style={{ fontWeight: 'bold', marginRight: 10 }}>Select Week:</label>
+                                <select
+                                    value={selectedWeek}
+                                    onChange={handleWeekSelect}
+                                    style={{ padding: '8px 12px', fontSize: '16px', minWidth: '150px', borderRadius: '8px' }}
+                                >
+                                    <option value="1">Week 1</option>
+                                    <option value="2">Week 2</option>
+                                    <option value="3">Week 3</option>
+                                    <option value="4">Week 4</option>
+                                </select>
+                            </div>
+
+                            <br></br>
+
+                            <div>
+                                <div>
+                                    <h4>Food - Week {selectedWeek}</h4>
+                                    <p>
+                                        Amount Owed: ${(selectedFamily.food_weekly || 0).toFixed(2)}
+                                    </p>
+                                    <input
+                                        type="number"
+                                        value={foodPayment}
+                                        onChange={(e) => setFoodPayment(e.target.value)}
+                                        disabled={isWeekPaid}
+                                    />
+                                    <button style={{ marginLeft: 10 }}
+                                        onClick={() => handlePayment('food')}
+                                        disabled={isWeekPaid}
+                                    >
+                                        {isWeekPaid ? 'PAID' : 'PAY'}
+                                    </button>
+                                </div>
+
+                                {selectedFamily.clothing > 0 && (
+                                    <div>
+                                        <h4>Clothing</h4>
+                                        <p>
+                                            Amount Owed: ${(selectedFamily.clothing || 0).toFixed(2)}
+                                        </p>
+                                        <input
+                                            type="number"
+                                            value={clothingPayment}
+                                            onChange={(e) => setClothingPayment(e.target.value)}
+                                            disabled={selectedFamily.clothing === 0 || selectedFamily.clothing === null}
+                                        />
+                                        <button style={{ marginLeft: 10 }}
+                                            onClick={() => handlePayment('clothing')}
+                                            disabled={selectedFamily.clothing === 0 || selectedFamily.clothing === null}
+                                        >
+                                            {selectedFamily.clothing === 0 ? 'PAID' : 'PAY'}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {selectedFamily.misc > 0 && (
+                                    <div>
+                                        <h4>Miscellaneous</h4>
+                                        <p>
+                                            ${(selectedFamily.misc || 0).toFixed(2)}
+                                        </p>
+                                        <input
+                                            type="number"
+                                            value={miscPayment}
+                                            onChange={(e) => setMiscPayment(e.target.value)}
+                                            disabled={selectedFamily.misc === 0 || selectedFamily.misc === null}
+                                        />
+                                        <button style={{ marginLeft: 10 }}
+                                            onClick={() => handlePayment('misc')}
+                                            disabled={selectedFamily.misc === 0 || selectedFamily.misc === null}
+                                        >
+                                            {selectedFamily.misc === 0 ? 'PAID' : 'PAY'}
+                                        </button>
+                                    </div>
+                                )}
+
+                                {selectedFamily.prescriptions > 0 && (
+                                    <div>
+                                        <h4>Prescription?</h4>
+                                        <p>
+                                            ${(selectedFamily.prescriptions || 0).toFixed(2)}
+                                        </p>
+                                        <input
+                                            type="number"
+                                            value={prescriptionsPayment}
+                                            onChange={(e) => setPrescriptionsPayment(e.target.value)}
+                                            disabled={selectedFamily.prescriptions === 0 || selectedFamily.prescriptions === null}
+                                        />
+                                        <button style={{ marginLeft: 10 }}
+                                            onClick={() => handlePayment('prescriptions')}
+                                            disabled={selectedFamily.prescriptions === 0 || selectedFamily.prescriptions === null}
+                                        >
+                                            {selectedFamily.prescriptions === 0 ? 'PAID' : 'PAY'}
+                                        </button>
+                                    </div>
+                                )}
+
+                            </div>
                         </div>
-
-                        {selectedFamily.clothing > 0 && (
-                            <div>
-                                <h4>Clothing</h4>
-                                <p>
-                                    ${(selectedFamily.clothing || 0).toFixed(2)}
-                                </p>
-                                <input
-                                    type="number"
-                                    value={clothingPayment}
-                                    onChange={(e) => setClothingPayment(e.target.value)}
-                                    disabled={selectedFamily.clothing === 0 || selectedFamily.clothing === null}
-                                />
-                                <button
-                                    onClick={() => handlePayment('clothing')}
-                                    disabled={selectedFamily.clothing === 0 || selectedFamily.clothing === null}
-                                >
-                                    {selectedFamily.clothing === 0 ? 'PAID' : 'PAY'}
-                                </button>
-                            </div>
-                        )}
-
-                        {selectedFamily.misc > 0 && (
-                            <div>
-                                <h4>Miscellaneous</h4>
-                                <p>
-                                    ${(selectedFamily.misc || 0).toFixed(2)}
-                                </p>
-                                <input
-                                    type="number"
-                                    value={miscPayment}
-                                    onChange={(e) => setMiscPayment(e.target.value)}
-                                    disabled={selectedFamily.misc === 0 || selectedFamily.misc === null}
-                                />
-                                <button
-                                    onClick={() => handlePayment('misc')}
-                                    disabled={selectedFamily.misc === 0 || selectedFamily.misc === null}
-                                >
-                                    {selectedFamily.misc === 0 ? 'PAID' : 'PAY'}
-                                </button>
-                            </div>
-                        )}
-
-                        {selectedFamily.prescriptions > 0 && (
-                            <div>
-                                <h4>Prescriptions</h4>
-                                <p>
-                                    ${(selectedFamily.prescriptions || 0).toFixed(2)}
-                                </p>
-                                <input
-                                    type="number"
-                                    value={prescriptionsPayment}
-                                    onChange={(e) => setPrescriptionsPayment(e.target.value)}
-                                    disabled={selectedFamily.prescriptions === 0 || selectedFamily.prescriptions === null}
-                                />
-                                <button
-                                    onClick={() => handlePayment('prescriptions')}
-                                    disabled={selectedFamily.prescriptions === 0 || selectedFamily.prescriptions === null}
-                                >
-                                    {selectedFamily.prescriptions === 0 ? 'PAID' : 'PAY'}
-                                </button>
-                            </div>
-                        )}
+                        <div className="col-md-4">
+                            <br></br>
+                            <p id="helptext">*Do <u>NOT</u> make any payments without a family member present.
+                            <br></br><br></br>
+                            *Your part-time employees are paid in <u>cash only</u>.</p>
+                        </div>
                     </div>
                 </div>
             )}
