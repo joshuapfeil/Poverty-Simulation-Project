@@ -53,8 +53,8 @@ export default function Utility() {
             billType === 'phone' ? Number(phonePayment) :
                 Number(electricPayment)
 
-        if (!amount || amount <= 0) {
-            setError('Please enter a valid amount')
+        if (!amount || amount <= 0 || amount > 1000) {
+            setError('Amount must be > 0 and ≤ 1000')
             return
         }
 
@@ -135,6 +135,9 @@ export default function Utility() {
                                 </p>
                                 <input
                                     type="number"
+                                    min="0.01"
+                                    max="1000"
+                                    step="0.01"
                                     value={gasPayment}
                                     onChange={(e) => setGasPayment(e.target.value)}
                                     disabled={selectedFamily.utilities_gas === 0 || selectedFamily.utilities_gas === null}
@@ -154,6 +157,9 @@ export default function Utility() {
                                 </p>
                                 <input
                                     type="number"
+                                    min="0.01"
+                                    max="1000"
+                                    step="0.01"
                                     value={phonePayment}
                                     onChange={(e) => setPhonePayment(e.target.value)}
                                     disabled={selectedFamily.utilities_phone === 0 || selectedFamily.utilities_phone === null}
@@ -173,6 +179,9 @@ export default function Utility() {
                                 </p>
                                 <input
                                     type="number"
+                                    min="0.01"
+                                    max="1000"
+                                    step="0.01"
                                     value={electricPayment}
                                     onChange={(e) => setElectricPayment(e.target.value)}
                                     disabled={selectedFamily.utilities_electric === 0 || selectedFamily.utilities_electric === null}

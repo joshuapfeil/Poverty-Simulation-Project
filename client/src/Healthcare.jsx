@@ -49,8 +49,8 @@ export default function HealthCare() {
 
         const amount = Number(selectedInsurance)
 
-        if (!amount || amount <= 0) {
-            setError('Please enter a valid amount')
+        if (!amount || amount <= 0 || amount > 1000) {
+            setError('Amount must be > 0 and ≤ 1000')
             return
         }
 

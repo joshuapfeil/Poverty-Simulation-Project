@@ -47,8 +47,8 @@ export default function QuikCash() {
 
         const amount = billType === 'withdraw' ? Number(withdrawAmount) : 0
 
-        if (!amount || amount <= 0) {
-            setError('Please enter a valid amount')
+        if (!amount || amount <= 0 || amount > 1000) {
+            setError('Amount must be > 0 and ≤ 1000')
             return
         }
 
@@ -141,6 +141,9 @@ export default function QuikCash() {
                                     <h4>Buy Transportation Passes</h4>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={withdrawAmount}
                                         onChange={(e) => setWithdrawAmount(e.target.value)}
                                         placeholder="Enter amount"

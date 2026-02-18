@@ -53,8 +53,8 @@ export default function Mortgage() {
             billType === 'taxes' ? Number(taxesPayment) :
                 Number(maintenancePayment)
 
-        if (!amount || amount <= 0) {
-            setError('Please enter a valid amount')
+        if (!amount || amount <= 0 || amount > 1000) {
+            setError('Amount must be > 0 and ≤ 1000')
             return
         }
 
@@ -137,6 +137,9 @@ export default function Mortgage() {
                                     </p>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={mortgagePayment}
                                         onChange={(e) => setMortgagePayment(e.target.value)}
                                         disabled={(selectedFamily.housing_mortgage === 0 || selectedFamily.housing_mortgage === null)}
@@ -156,6 +159,9 @@ export default function Mortgage() {
                                     </p>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={taxesPayment}
                                         onChange={(e) => setTaxesPayment(e.target.value)}
                                         disabled={selectedFamily.housing_taxes === 0 || selectedFamily.housing_taxes === null}
@@ -175,6 +181,9 @@ export default function Mortgage() {
                                     </p>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={maintenancePayment}
                                         onChange={(e) => setMaintenancePayment(e.target.value)}
                                         disabled={selectedFamily.housing_maintenance === 0 || selectedFamily.housing_maintenance === null}

@@ -62,8 +62,8 @@ export default function Bank() {
                             billType === 'miscBank' ? Number(miscBankPayment) :
                                 0
 
-        if (!amount || amount <= 0) {
-            setError('Please enter a valid amount')
+        if (!amount || amount <= 0 || amount > 1000) {
+            setError('Amount must be > 0 and ≤ 1000')
             return
         }
 
@@ -163,6 +163,9 @@ export default function Bank() {
                                     <h4>Deposit</h4>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={depositAmount}
                                         onChange={(e) => setDepositAmount(e.target.value)}
                                         placeholder="Enter amount"
@@ -175,6 +178,9 @@ export default function Bank() {
                                     <h4>Withdraw</h4>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={withdrawAmount}
                                         onChange={(e) => setWithdrawAmount(e.target.value)}
                                         placeholder="Enter amount"
@@ -187,6 +193,9 @@ export default function Bank() {
                                     <p>Amount Owed: ${(selectedFamily.automobile_loan || 0).toFixed(2)}</p>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={autoLoanPayment}
                                         onChange={(e) => setAutoLoanPayment(e.target.value)}
                                         disabled={selectedFamily.automobile_loan === 0 || selectedFamily.automobile_loan === null}
@@ -206,6 +215,9 @@ export default function Bank() {
                                     <p>Amount Owed: ${(selectedFamily.student_loans || 0).toFixed(2)}</p>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={studentLoanPayment}
                                         onChange={(e) => setStudentLoanPayment(e.target.value)}
                                         disabled={selectedFamily.student_loans === 0 || selectedFamily.student_loans === null}
@@ -225,6 +237,9 @@ export default function Bank() {
                                     <p>Amount Owed: ${(selectedFamily.credit_card || 0).toFixed(2)}</p>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={creditCardPayment}
                                         onChange={(e) => setCreditCardPayment(e.target.value)}
                                         disabled={selectedFamily.credit_card === 0 || selectedFamily.credit_card === null}
@@ -241,6 +256,9 @@ export default function Bank() {
                                     <p>Amount Owed: ${(selectedFamily.misc_bank || 0).toFixed(2)}</p>
                                     <input
                                         type="number"
+                                        min="0.01"
+                                        max="1000"
+                                        step="0.01"
                                         value={miscBankPayment}
                                         onChange={(e) => setMiscBankPayment(e.target.value)}
                                         disabled={selectedFamily.misc_bank === 0 || selectedFamily.misc_bank === null}

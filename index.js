@@ -107,6 +107,15 @@ app.get('/families/:id', async (request, response) => {
 app.post('/families/', async (request, response) => {
     try {
         const body = request.body;
+
+        // Basic validation: monetary fields must not be negative
+        const moneyFields = ['bank_total','monthly_bills','housing_mortgage','housing_taxes','housing_maintenance','utilities_gas','utilities_electric','utilities_phone','student_loans','food_weekly','clothing','credit_card','automobile_loan','misc_supercenter','misc_bank','prescriptions'];
+        for (const f of moneyFields) {
+            if (typeof body[f] !== 'undefined' && Number(body[f]) < 0) {
+                return response.status(400).json({ message: `${f} cannot be negative` });
+            }
+        }
+
         await families.insert({ body });
         const all = await families.getAll();
         await broadcastFamilies();
@@ -122,6 +131,15 @@ app.put('/families/:id', async (request, response) => {
     try {
         const body = request.body;
         body.id = request.params.id;
+
+        // Validate monetary fields are non-negative
+        const moneyFields = ['bank_total','monthly_bills','housing_mortgage','housing_taxes','housing_maintenance','utilities_gas','utilities_electric','utilities_phone','student_loans','food_weekly','clothing','credit_card','automobile_loan','misc_supercenter','misc_bank','prescriptions'];
+        for (const f of moneyFields) {
+            if (typeof body[f] !== 'undefined' && Number(body[f]) < 0) {
+                return response.status(400).json({ message: `${f} cannot be negative` });
+            }
+        }
+
         await families.edit({ body });
         const all = await families.getAll();
         await broadcastFamilies();
@@ -226,10 +244,14 @@ app.delete('/people/:id', async (request, response) => {
 app.post('/api/transactions/deposit', async (request, response) => {
     try {
         const { family_id, amount } = request.body;
+        console.log('DEPOSIT REQ', { family_id, amount })
         if (!family_id || amount == null) {
             return response.status(400).json({ message: 'family_id and amount required' });
         }
-        const updatedFamily = await transactions.deposit(family_id, Number(amount));
+        const num = Number(amount);
+        console.log('DEPOSIT parsed num', { num, typeof_amount: typeof amount })
+        if (Number.isNaN(num) || num <= 0 || num > 1000) return response.status(400).json({ message: 'Amount must be > 0 and <= 1000' });
+        const updatedFamily = await transactions.deposit(family_id, num);
         await broadcastFamilies();
         return response.status(200).json({ data: updatedFamily });
     } catch (error) {
@@ -245,7 +267,9 @@ app.post('/api/transactions/withdraw', async (request, response) => {
         if (!family_id || amount == null) {
             return response.status(400).json({ message: 'family_id and amount required' });
         }
-        const updatedFamily = await transactions.withdraw(family_id, Number(amount));
+        const num = Number(amount);
+        if (Number.isNaN(num) || num <= 0 || num > 1000) return response.status(400).json({ message: 'Amount must be > 0 and <= 1000' });
+        const updatedFamily = await transactions.withdraw(family_id, num);
         await broadcastFamilies();
         return response.status(200).json({ data: updatedFamily });
     } catch (error) {
@@ -261,7 +285,9 @@ app.post('/api/transactions/pay-employee', async (request, response) => {
         if (!family_id || !person_id || !week || amount == null) {
             return response.status(400).json({ message: 'family_id, person_id, week, and amount required' });
         }
-        const result = await transactions.payEmployee(family_id, person_id, Number(week), Number(amount));
+        const num = Number(amount);
+        if (Number.isNaN(num) || num <= 0 || num > 1000) return response.status(400).json({ message: 'Amount must be > 0 and <= 1000' });
+        const result = await transactions.payEmployee(family_id, person_id, Number(week), num);
         await broadcastFamilies();
         return response.status(200).json({ data: result });
     } catch (error) {
@@ -277,7 +303,9 @@ app.post('/api/transactions/pay-bill', async (request, response) => {
         if (!family_id || !bill_type || amount == null) {
             return response.status(400).json({ message: 'family_id, bill_type, and amount required' });
         }
-        const updatedFamily = await transactions.payBill(family_id, bill_type, Number(amount), week ? Number(week) : null);
+        const num = Number(amount);
+        if (Number.isNaN(num) || num <= 0 || num > 1000) return response.status(400).json({ message: 'Amount must be > 0 and <= 1000' });
+        const updatedFamily = await transactions.payBill(family_id, bill_type, num, week ? Number(week) : null);
         await broadcastFamilies();
         return response.status(200).json({ data: updatedFamily });
     } catch (error) {

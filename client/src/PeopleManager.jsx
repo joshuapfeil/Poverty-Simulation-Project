@@ -60,6 +60,17 @@ export default function PeopleManager({ familyId }) {
   const handleAdd = async (e) => {
     e.preventDefault()
     setError(null)
+
+    // Validate weekly pay inputs
+    const w1 = Number(week1) || 0
+    const w2 = Number(week2) || 0
+    const w3 = Number(week3) || 0
+    const w4 = Number(week4) || 0
+    if (w1 < 0 || w1 > 1000 || w2 < 0 || w2 > 1000 || w3 < 0 || w3 > 1000 || w4 < 0 || w4 > 1000) {
+      setError('Week pay values must be between 0 and 1000')
+      return
+    }
+
     try {
       const res = await fetch('/people', {
         method: 'POST',
@@ -68,10 +79,10 @@ export default function PeopleManager({ familyId }) {
           first_name: firstName,
           last_name: lastName,
           family_id: familyId,
-          Week1Pay: Number(week1) || 0,
-          Week2Pay: Number(week2) || 0,
-          Week3Pay: Number(week3) || 0,
-          Week4Pay: Number(week4) || 0,
+          Week1Pay: w1,
+          Week2Pay: w2,
+          Week3Pay: w3,
+          Week4Pay: w4,
           week1_paid: week1Paid ? 1 : 0,
           week2_paid: week2Paid ? 1 : 0,
           week3_paid: week3Paid ? 1 : 0,
@@ -136,6 +147,16 @@ export default function PeopleManager({ familyId }) {
   }
 
   const saveEdit = async (id) => {
+    // Validate edited week pay amounts
+    const ew1 = Number(editWeek1) || 0
+    const ew2 = Number(editWeek2) || 0
+    const ew3 = Number(editWeek3) || 0
+    const ew4 = Number(editWeek4) || 0
+    if (ew1 < 0 || ew1 > 1000 || ew2 < 0 || ew2 > 1000 || ew3 < 0 || ew3 > 1000 || ew4 < 0 || ew4 > 1000) {
+      setError('Week pay values must be between 0 and 1000')
+      return
+    }
+
     try {
       const res = await fetch(`/people/${id}`, {
         method: 'PUT',
@@ -145,10 +166,10 @@ export default function PeopleManager({ familyId }) {
           first_name: editFirstName,
           last_name: editLastName,
           family_id: familyId,
-          Week1Pay: Number(editWeek1) || 0,
-          Week2Pay: Number(editWeek2) || 0,
-          Week3Pay: Number(editWeek3) || 0,
-          Week4Pay: Number(editWeek4) || 0,
+          Week1Pay: ew1,
+          Week2Pay: ew2,
+          Week3Pay: ew3,
+          Week4Pay: ew4,
           week1_paid: editWeek1Paid ? 1 : 0,
           week2_paid: editWeek2Paid ? 1 : 0,
           week3_paid: editWeek3Paid ? 1 : 0,
@@ -195,13 +216,13 @@ export default function PeopleManager({ familyId }) {
       <form onSubmit={handleAdd} style={{ marginBottom: 10 }}>
         <input placeholder="First name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
         <input placeholder="Last name" value={lastName} onChange={(e) => setLastName(e.target.value)} style={{ marginLeft: 6 }} />
-        <input placeholder="Week1 pay" type="number" value={week1} onChange={(e) => setWeek1(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <input placeholder="Week1 pay" type="number" min="0" max="1000" step="1" value={week1} onChange={(e) => setWeek1(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
         <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week1Paid} onChange={(e) => setWeek1Paid(e.target.checked)} /> Paid</label>
-        <input placeholder="Week2 pay" type="number" value={week2} onChange={(e) => setWeek2(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <input placeholder="Week2 pay" type="number" min="0" max="1000" step="1" value={week2} onChange={(e) => setWeek2(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
         <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week2Paid} onChange={(e) => setWeek2Paid(e.target.checked)} /> Paid</label>
-        <input placeholder="Week3 pay" type="number" value={week3} onChange={(e) => setWeek3(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <input placeholder="Week3 pay" type="number" min="0" max="1000" step="1" value={week3} onChange={(e) => setWeek3(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
         <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week3Paid} onChange={(e) => setWeek3Paid(e.target.checked)} /> Paid</label>
-        <input placeholder="Week4 pay" type="number" value={week4} onChange={(e) => setWeek4(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
+        <input placeholder="Week4 pay" type="number" min="0" max="1000" step="1" value={week4} onChange={(e) => setWeek4(e.target.value)} style={{ marginLeft: 6, width: 100 }} />
         <label style={{ marginLeft: 6 }}><input type="checkbox" checked={week4Paid} onChange={(e) => setWeek4Paid(e.target.checked)} /> Paid</label>
         <label style={{ marginLeft: 6 }}>
           <input type="checkbox" checked={onLeave} onChange={(e) => setOnLeave(e.target.checked)} /> On leave

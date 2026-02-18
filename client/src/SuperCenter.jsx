@@ -68,8 +68,8 @@ export default function SuperCenter() {
                 billType === 'misc_supercenter' ? Number(miscPayment) :
                     Number(prescriptionsPayment)
 
-        if (!amount || amount <= 0) {
-            setError('Please enter a valid amount')
+if (!amount || amount <= 0 || amount > 1000) {
+            setError('Amount must be > 0 and ≤ 1000')
             return
         }
 
@@ -196,8 +196,9 @@ export default function SuperCenter() {
                                             Amount Owed: ${(selectedFamily.clothing || 0).toFixed(2)}
                                         </p>
                                         <input
-                                            type="number"
-                                            value={clothingPayment}
+                                            type="number"                                            min="0.01"
+                                            max="1000"
+                                            step="0.01"                                            value={clothingPayment}
                                             onChange={(e) => setClothingPayment(e.target.value)}
                                             disabled={selectedFamily.clothing === 0 || selectedFamily.clothing === null}
                                         />
@@ -217,8 +218,9 @@ export default function SuperCenter() {
                                             ${(selectedFamily.misc_supercenter || 0).toFixed(2)}
                                         </p>
                                         <input
-                                            type="number"
-                                            value={miscPayment}
+                                            type="number"                                            min="0.01"
+                                            max="1000"
+                                            step="0.01"                                            value={miscPayment}
                                             onChange={(e) => setMiscPayment(e.target.value)}
                                             disabled={selectedFamily.misc_supercenter === 0 || selectedFamily.misc_supercenter === null}
                                         />
@@ -239,6 +241,9 @@ export default function SuperCenter() {
                                         </p>
                                         <input
                                             type="number"
+                                            min="0.01"
+                                            max="1000"
+                                            step="0.01"
                                             value={prescriptionsPayment}
                                             onChange={(e) => setPrescriptionsPayment(e.target.value)}
                                             disabled={selectedFamily.prescriptions === 0 || selectedFamily.prescriptions === null}

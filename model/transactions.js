@@ -13,9 +13,9 @@ const connection = require('./connection');
  * @returns {object} Updated family data
  */
 async function deposit(familyId, amount) {
-    // Validate inputs
-    if (!familyId || amount <= 0) {
-        throw new Error('Invalid family ID or amount');
+    // Validate inputs — enforce reasonable transaction bounds
+    if (!familyId || typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0 || amount > 1000) {
+        throw new Error('Amount must be > 0 and <= 1000');
     }
 
     // Fetch current family data
@@ -45,9 +45,9 @@ async function deposit(familyId, amount) {
  * @returns {object} Updated family data
  */
 async function withdraw(familyId, amount) {
-    // Validate inputs
-    if (!familyId || amount <= 0) {
-        throw new Error('Invalid family ID or amount');
+    // Validate inputs — enforce reasonable transaction bounds
+    if (!familyId || typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0 || amount > 1000) {
+        throw new Error('Amount must be > 0 and <= 1000');
     }
 
     // Fetch current family data
@@ -87,8 +87,8 @@ async function withdraw(familyId, amount) {
  */
 async function payEmployee(familyId, personId, weekNumber, amount) {
     // Validate inputs
-    if (!familyId || !personId || !weekNumber || amount <= 0) {
-        throw new Error('Invalid parameters for employee payment');
+    if (!familyId || !personId || !weekNumber || typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0 || amount > 1000) {
+        throw new Error('Amount must be > 0 and <= 1000');
     }
 
     if (weekNumber < 1 || weekNumber > 4) {
@@ -160,9 +160,9 @@ async function payEmployee(familyId, personId, weekNumber, amount) {
  * @returns {object} Updated family data
  */
 async function payBill(familyId, billType, amount, week = null) {
-    // Validate inputs
-    if (!familyId || !billType || amount <= 0) {
-        throw new Error('Invalid parameters for bill payment');
+    // Validate inputs — enforce amount bounds
+    if (!familyId || !billType || typeof amount !== 'number' || Number.isNaN(amount) || amount <= 0 || amount > 1000) {
+        throw new Error('Amount must be > 0 and <= 1000');
     }
 
     const validBillTypes = ['gas', 'electric', 'phone', 'autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance', 'clothing', 'food', 'quikCash', 'prescriptions', 'misc_bank', 'misc_supercenter'];
