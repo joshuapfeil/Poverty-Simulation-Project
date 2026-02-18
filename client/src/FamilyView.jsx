@@ -133,6 +133,43 @@ export default function FamilyView() {
               <div id="section">
                 <h3>Bills to Pay This Month</h3>
 
+                   {/* Food - Weekly */}
+                {family.food_weekly > 0 && (
+                    <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+                      <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Groceries (Pay to Food-A-Rama Super Center) - ${(Number(family.food_weekly) * 4).toFixed(2)}</h4>
+                      <div style={{ marginLeft: '20px' }}>
+                        <p style={{ margin: '5px 0' }}>
+                          <b>Food:</b> ${Number(family.food_weekly).toFixed(2)} per week
+                        </p>
+                        {/* <p style={{ fontSize: '14px', color: '#666', margin: '5px 0' }}>
+                          (Approximately ${(Number(family.food_weekly) * 4).toFixed(2)} per month)
+                        </p> */}
+                      </div>
+
+                      {/* Food weeks tracker - Read only */}
+                      <div style={{ marginLeft: '20px', marginTop: '15px' }}>
+                        <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Food Purchased This Month:</p>
+                        <div style={{ display: 'flex', gap: 12 }}>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <input type="checkbox" checked={foodWeeks[1]} disabled /> Week 1
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <input type="checkbox" checked={foodWeeks[2]} disabled /> Week 2
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <input type="checkbox" checked={foodWeeks[3]} disabled /> Week 3
+                          </label>
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                            <input type="checkbox" checked={foodWeeks[4]} disabled /> Week 4
+                          </label>
+                        </div>
+                        <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+                          {calculateUnpaidFoodWeeks()} week(s) remaining • ${calculateFoodDue().toFixed(2)} still due
+                        </p>
+                      </div>
+                    </div>
+                )}
+
                 {/* Housing Section (always shown for consistency) */}
                 <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
                   <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>
@@ -176,42 +213,7 @@ export default function FamilyView() {
 
 
 
-                {/* Food - Weekly */}
-                {family.food_weekly > 0 && (
-                    <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                      <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Groceries (Pay to Food-A-Rama Super Center) - ${(Number(family.food_weekly) * 4).toFixed(2)}</h4>
-                      <div style={{ marginLeft: '20px' }}>
-                        <p style={{ margin: '5px 0' }}>
-                          <b>Food:</b> ${Number(family.food_weekly).toFixed(2)} per week
-                        </p>
-                        {/* <p style={{ fontSize: '14px', color: '#666', margin: '5px 0' }}>
-                          (Approximately ${(Number(family.food_weekly) * 4).toFixed(2)} per month)
-                        </p> */}
-                      </div>
-
-                      {/* Food weeks tracker - Read only */}
-                      <div style={{ marginLeft: '20px', marginTop: '15px' }}>
-                        <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Food Purchased This Month:</p>
-                        <div style={{ display: 'flex', gap: 12 }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[1]} disabled /> Week 1
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[2]} disabled /> Week 2
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[3]} disabled /> Week 3
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[4]} disabled /> Week 4
-                          </label>
-                        </div>
-                        <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                          {calculateUnpaidFoodWeeks()} week(s) remaining • ${calculateFoodDue().toFixed(2)} still due
-                        </p>
-                      </div>
-                    </div>
-                )}
+             
 
                 {/* Other Bills */}
                 <div style={{ marginBottom: '10px' }}>
