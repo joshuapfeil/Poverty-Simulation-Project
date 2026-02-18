@@ -22,6 +22,7 @@ import Mortgage from './Mortgage'
 import SuperCenter from './SuperCenter'
 import QuikCash from './QuikCash'
 import Healthcare from './Healthcare'
+import ProtectedRoute from './ProtectedRoute'
 import BannerImage from './images/povsim.png'
 
 function Home() {
@@ -46,18 +47,22 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/admin" element={<FamiliesAdmin />} />
       <Route path="/login" element={<Login />} />
       <Route path="/family" element={<FamilyView />} />
+      {/* Support both numeric id and username routes for backward compatibility */}
       <Route path="/family/:id" element={<FamilyView />} />
-      <Route path="/community" element={<CommunityView />} />
-      <Route path="/utility" element={<Utility />} />
-      <Route path="/bank" element={<Bank />} />
-      <Route path="/employer" element={<Employer />} />
-      <Route path="/mortgage" element={<Mortgage />} />
-      <Route path="/quikcash" element={<QuikCash />} />
-      <Route path="/supercenter" element={<SuperCenter />} />
-      <Route path="/healthcare" element={<Healthcare />} />
+      <Route path="/family/:username" element={<FamilyView />} />
+      <Route path="/community" element={<ProtectedRoute allowedRoles="community"><CommunityView /></ProtectedRoute>} />
+
+      {/* Protected routes — only accessible after logging in with the matching role */}
+      <Route path="/admin" element={<ProtectedRoute allowedRoles="admin"><FamiliesAdmin /></ProtectedRoute>} />
+      <Route path="/utility" element={<ProtectedRoute allowedRoles="utility"><Utility /></ProtectedRoute>} />
+      <Route path="/bank" element={<ProtectedRoute allowedRoles="bank"><Bank /></ProtectedRoute>} />
+      <Route path="/employer" element={<ProtectedRoute allowedRoles="employer"><Employer /></ProtectedRoute>} />
+      <Route path="/mortgage" element={<ProtectedRoute allowedRoles="mortgage"><Mortgage /></ProtectedRoute>} />
+      <Route path="/quikcash" element={<ProtectedRoute allowedRoles="quikcash"><QuikCash /></ProtectedRoute>} />
+      <Route path="/supercenter" element={<ProtectedRoute allowedRoles="supercenter"><SuperCenter /></ProtectedRoute>} />
+      <Route path="/healthcare" element={<ProtectedRoute allowedRoles="healthcare"><Healthcare /></ProtectedRoute>} />
     </Routes>
   )
 }

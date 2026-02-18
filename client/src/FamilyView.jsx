@@ -15,9 +15,10 @@ function useQuery() {
 
 export default function FamilyView() {
   const query = useQuery()
-  const { id: paramId } = useParams()
+  const { id: paramId, username: paramUsername } = useParams()
   const queryId = query.get('id')
-  const id = paramId || queryId
+  // identifier can be numeric id or username (supports: /family/123, /family/username, ?id=123)
+  const id = paramId || paramUsername || queryId
   const [family, setFamily] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -45,7 +46,15 @@ export default function FamilyView() {
     setLoading(familiesLoading)
     if (!id) return
     if (!familiesLoading) {
-      const found = families.find(f => f.id === parseInt(id))
+      let found = null
+      // numeric identifier → lookup by id
+      if (/^\d+$/.test(id)) {
+        found = families.find(f => f.id === Number(id))
+      } else {
+        // treat as username (family name) — case-insensitive match
+        const name = decodeURIComponent(id)
+        found = families.find(f => f.name && f.name.toLowerCase() === name.toLowerCase())
+      }
       setFamily(found || null)
     }
   }, [id, families, familiesLoading, familiesError])

@@ -34,7 +34,11 @@ export default function Login() {
 
     // Check if it's a special user
     if (specialUsers[username]) {
-      navigate(specialUsers[username])
+      const path = specialUsers[username]
+      const role = path.replace(/^\//, '')
+      // persist simple client-side session (username + role)
+      localStorage.setItem('currentUser', JSON.stringify({ username, role }))
+      navigate(path)
       return
     }
 
@@ -45,9 +49,10 @@ export default function Login() {
       const data = await response.json()
       
       if (data.data && data.data.length > 0) {
-        // Family found, navigate to family view with the family ID
+        // Family found, persist session and navigate to family view by username
         const family = data.data[0]
-        navigate(`/family?id=${family.id}`)
+        localStorage.setItem('currentUser', JSON.stringify({ username: family.name, role: 'family' }))
+        navigate(`/family/${encodeURIComponent(family.name)}`)
       } else {
         setError('Invalid username. Please try again.')
       }
