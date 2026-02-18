@@ -63,19 +63,19 @@ export default function FamilyView() {
   const calculateMonthlyBills = () => {
     if (!family) return 0
     return (
-        (Number(family.housing_mortgage) || 0) +
-        (Number(family.housing_taxes) || 0) +
-        (Number(family.housing_maintenance) || 0) +
-        (Number(family.utilities_gas) || 0) +
-        (Number(family.utilities_electric) || 0) +
-        (Number(family.utilities_phone) || 0) +
-        (Number(family.student_loans) || 0) +
-        (Number(family.clothing) || 0) +
-        (Number(family.credit_card) || 0) +
-        (Number(family.automobile_loan) || 0) +
-        (Number(family.prescriptions) || 0) +
-        (Number(family.misc_supercenter) || 0) +
-        (Number(family.misc_bank) || 0)
+      (Number(family.housing_mortgage) || 0) +
+      (Number(family.housing_taxes) || 0) +
+      (Number(family.housing_maintenance) || 0) +
+      (Number(family.utilities_gas) || 0) +
+      (Number(family.utilities_electric) || 0) +
+      (Number(family.utilities_phone) || 0) +
+      (Number(family.student_loans) || 0) +
+      (Number(family.clothing) || 0) +
+      (Number(family.credit_card) || 0) +
+      (Number(family.automobile_loan) || 0) +
+      (Number(family.prescriptions) || 0) +
+      (Number(family.misc_supercenter) || 0) +
+      (Number(family.misc_bank) || 0)
     )
   }
 
@@ -83,9 +83,9 @@ export default function FamilyView() {
   const calculateHousingTotal = () => {
     if (!family) return 0
     return (
-        (Number(family.housing_mortgage) || 0) +
-        (Number(family.housing_taxes) || 0) +
-        (Number(family.housing_maintenance) || 0)
+      (Number(family.housing_mortgage) || 0) +
+      (Number(family.housing_taxes) || 0) +
+      (Number(family.housing_maintenance) || 0)
     )
   }
 
@@ -93,10 +93,17 @@ export default function FamilyView() {
   const calculateUtilitiesTotal = () => {
     if (!family) return 0
     return (
-        (Number(family.utilities_gas) || 0) +
-        (Number(family.utilities_electric) || 0) +
-        (Number(family.utilities_phone) || 0)
+      (Number(family.utilities_gas) || 0) +
+      (Number(family.utilities_electric) || 0) +
+      (Number(family.utilities_phone) || 0)
     )
+  }
+
+  // Whether there are any 'other' monthly bills (used to show a friendly message)
+  const hasOtherBills = () => {
+    if (!family) return false
+    const keys = ['student_loans', 'clothing', 'prescriptions', 'misc_supercenter', 'misc_bank', 'medical', 'credit_card', 'automobile_loan']
+    return keys.some(k => Number(family[k] || 0) > 0)
   }
 
   // Calculate unpaid food weeks
@@ -112,162 +119,183 @@ export default function FamilyView() {
   }
 
   return (
-      <div style={{ padding: 20 }} className="container">
-        <h1>Family Account View</h1>
-        {!id && <p>No family selected. Use <code>?id=1</code> in the URL to view a family (placeholder).</p>}
-        {loading && <p>Loading...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        {family && (
-            <div>
-              <h2 style={{ textAlign: "center" }}>{family.name}</h2> <br></br>
+    <div style={{ padding: 20 }} className="container">
+      <h1>Family Account View</h1>
+      {!id && <p>No family selected. Use <code>?id=1</code> in the URL to view a family (placeholder).</p>}
+      {loading && <p>Loading...</p>}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {family && (
+        <div>
+          <h2 style={{ textAlign: "center" }}>{family.name}</h2> <br></br>
 
-              {/* Bank Balance Section */}
-              <div style={{ backgroundColor: '#e8f5e9', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
-                <h3 style={{ margin: '0 0 10px 0', color: '#2e7d32' }}>Current Bank Balance</h3>
-                <p style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: '#2e7d32' }}>
-                  ${Number(family.bank_total || 0).toFixed(2)}
-                </p>
-              </div>
+          {/* Bank Balance Section */}
+          <div style={{ backgroundColor: '#e8f5e9', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+            <h3 style={{ margin: '0 0 10px 0', color: '#2e7d32' }}>Current Bank Balance</h3>
+            <p style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: '#2e7d32' }}>
+              ${Number(family.bank_total || 0).toFixed(2)}
+            </p>
+          </div>
 
-              {/* Detailed Bills Breakdown */}
-              <div id="section">
-                <h3>Bills to Pay This Month</h3>
+          {/* Detailed Bills Breakdown */}
+          <div id="section">
+            <h3>Bills to Pay This Month</h3>
 
-                   {/* Food - Weekly */}
-                {family.food_weekly > 0 && (
-                    <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                      <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Groceries (Pay to Food-A-Rama Super Center) - ${calculateFoodDue().toFixed(2)}</h4>
-                      <div style={{ marginLeft: '20px' }}>
-                        <p style={{ margin: '5px 0' }}>
-                          <b>Food:</b> ${Number(family.food_weekly).toFixed(2)} per week
-                        </p>
-                        {/* <p style={{ fontSize: '14px', color: '#666', margin: '5px 0' }}>
+            {/* Food - Weekly */}
+            <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+              <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Groceries (Pay to Food-A-Rama Super Center) - ${calculateFoodDue().toFixed(2)}</h4>
+              <div style={{ marginLeft: '20px' }}>
+                {(calculateFoodDue().toFixed(2) || 0) > 0 ? (
+                  <>
+                    <p style={{ margin: '5px 0' }}>
+                      <b>Food:</b> ${Number(family.food_weekly).toFixed(2)} per week
+                    </p>
+                    {/* <p style={{ fontSize: '14px', color: '#666', margin: '5px 0' }}>
                           (Approximately ${(Number(family.food_weekly) * 4).toFixed(2)} per month)
                         </p> */}
-                      </div>
-
-                      {/* Food weeks tracker - Read only */}
-                      <div style={{ marginLeft: '20px', marginTop: '15px' }}>
-                        <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Food Purchased This Month:</p>
-                        <div style={{ display: 'flex', gap: 12 }}>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[1]} disabled /> Week 1
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[2]} disabled /> Week 2
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[3]} disabled /> Week 3
-                          </label>
-                          <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <input type="checkbox" checked={foodWeeks[4]} disabled /> Week 4
-                          </label>
-                        </div>
-                        <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                          {calculateUnpaidFoodWeeks()} week(s) remaining • ${calculateFoodDue().toFixed(2)} still due
-                        </p>
-                      </div>
-                    </div>
+                  </>
+                ) : (
+                  <p style={{ margin: '5px 0', color: '#666' }}>No grocery charges at this time.</p>
                 )}
-
-                {/* Housing Section (always shown for consistency) */}
-                <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                  <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>
-                    Housing (Pay to Sweaney Mortgage & Realty) - ${calculateHousingTotal().toFixed(2)}
-                  </h4>
-                  <div style={{ marginLeft: '20px' }}>
-                    {family.housing_mortgage > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Mortgage:</b> ${Number(family.housing_mortgage).toFixed(2)}</p>
-                    )}
-                    {family.housing_taxes > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Taxes:</b> ${Number(family.housing_taxes).toFixed(2)}</p>
-                    )}
-                    {family.housing_maintenance > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Maintenance:</b> ${Number(family.housing_maintenance).toFixed(2)}</p>
-                    )}
-                    { ( (family.housing_mortgage || 0) === 0 && (family.housing_taxes || 0) === 0 && (family.housing_maintenance || 0) === 0 ) && (
-                        <p style={{ margin: '5px 0', color: '#666' }}>No housing charges at this time.</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Utilities Section */}
-                {calculateUtilitiesTotal() > 0 && (
-                    <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                      <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>
-                        Utilities (Pay to Friendly Utility Company) - ${calculateUtilitiesTotal().toFixed(2)}
-                      </h4>
-                      <div style={{ marginLeft: '20px' }}>
-                        {family.utilities_gas > 0 && (
-                            <p style={{ margin: '5px 0' }}><b>Gas:</b> ${Number(family.utilities_gas).toFixed(2)}</p>
-                        )}
-                        {family.utilities_electric > 0 && (
-                            <p style={{ margin: '5px 0' }}><b>Electric:</b> ${Number(family.utilities_electric).toFixed(2)}</p>
-                        )}
-                        {family.utilities_phone > 0 && (
-                            <p style={{ margin: '5px 0' }}><b>Phone:</b> ${Number(family.utilities_phone).toFixed(2)}</p>
-                        )}
-                      </div>
-                    </div>
-                )}
-
-
-
-             
-
-                {/* Other Bills */}
-                <div style={{ marginBottom: '10px' }}>
-                  <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Other Monthly Bills</h4>
-                  <div style={{ marginLeft: '20px' }}>
-                    {family.student_loans > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Student Loans</b> (Pay to U Trust US National Bank): ${Number(family.student_loans).toFixed(2)}</p>
-                    )}
-                    {family.clothing > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Clothing</b> (Pay to Food-A-Rama Super Center): ${Number(family.clothing).toFixed(2)}</p>
-                    )}
-                    {family.prescriptions > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Prescriptions</b> (Pay to Food-A-Rama Super Center): ${Number(family.prescriptions).toFixed(2)}</p>
-                    )}
-                    {family.misc_supercenter > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Miscellaneous</b> (Pay to Food-A-Rama Super Center): ${Number(family.misc_supercenter).toFixed(2)}</p>
-                    )}
-                    {family.misc_bank > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Miscellaneous</b> (Pay to U Trust US National Bank): ${Number(family.misc_bank).toFixed(2)}</p>
-                    )}
-                    {family.medical > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Medical</b> (Pay to Community Healthcare): ${Number(family.medical).toFixed(2)}</p>
-                    )}
-                    {family.credit_card > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Credit Card Minimum Payment</b> (Pay to U Trust US National Bank): ${Number(family.credit_card).toFixed(2)}</p>
-                    )}
-                    {family.automobile_loan > 0 && (
-                        <p style={{ margin: '5px 0' }}><b>Automobile Loan</b> (Pay to U Trust US National Bank): ${Number(family.automobile_loan).toFixed(2)}</p>
-                    )}
-                  </div>
-                </div>
-
               </div>
 
-              {/* Total Amount Due This Month */}
-              <div style={{ backgroundColor: '#ffebee', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
-                <h3 style={{ margin: '0 0 10px 0', color: '#c62828' }}>Total Amount Due</h3>
+              {/* Food weeks tracker - Read only */}
+              {(calculateFoodDue().toFixed(2) || 0) > 0 ? (
+                <div style={{ marginLeft: '20px', marginTop: '15px' }}>
+                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>Food Purchased This Month:</p>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <input type="checkbox" checked={foodWeeks[1]} disabled /> Week 1
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <input type="checkbox" checked={foodWeeks[2]} disabled /> Week 2
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <input type="checkbox" checked={foodWeeks[3]} disabled /> Week 3
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <input type="checkbox" checked={foodWeeks[4]} disabled /> Week 4
+                    </label>
+                  </div>
+                  <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
+                    {calculateUnpaidFoodWeeks()} week(s) remaining • ${calculateFoodDue().toFixed(2)} still due
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Housing Section (always shown for consistency) */}
+            <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+              <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>
+                Housing (Pay to Sweaney Mortgage & Realty) - ${calculateHousingTotal().toFixed(2)}
+              </h4>
+              <div style={{ marginLeft: '20px' }}>
+                {family.housing_mortgage > 0 && (
+                  <p style={{ margin: '5px 0' }}><b>Mortgage:</b> ${Number(family.housing_mortgage).toFixed(2)}</p>
+                )}
+                {family.housing_taxes > 0 && (
+                  <p style={{ margin: '5px 0' }}><b>Taxes:</b> ${Number(family.housing_taxes).toFixed(2)}</p>
+                )}
+                {family.housing_maintenance > 0 && (
+                  <p style={{ margin: '5px 0' }}><b>Maintenance:</b> ${Number(family.housing_maintenance).toFixed(2)}</p>
+                )}
+                {((family.housing_mortgage || 0) === 0 && (family.housing_taxes || 0) === 0 && (family.housing_maintenance || 0) === 0) && (
+                  <p style={{ margin: '5px 0', color: '#666' }}>No housing charges at this time.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Utilities Section */}
+            {calculateUtilitiesTotal() > 0 && (
+              <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
+                <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>
+                  Utilities (Pay to Friendly Utility Company) - ${calculateUtilitiesTotal().toFixed(2)}
+                </h4>
+                <div style={{ marginLeft: '20px' }}>
+                  {family.utilities_gas > 0 && (
+                    <p style={{ margin: '5px 0' }}><b>Gas:</b> ${Number(family.utilities_gas).toFixed(2)}</p>
+                  )}
+                  {family.utilities_electric > 0 && (
+                    <p style={{ margin: '5px 0' }}><b>Electric:</b> ${Number(family.utilities_electric).toFixed(2)}</p>
+                  )}
+                  {family.utilities_phone > 0 && (
+                    <p style={{ margin: '5px 0' }}><b>Phone:</b> ${Number(family.utilities_phone).toFixed(2)}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+
+
+
+
+            {/* Other Bills */}
+            <div style={{ marginBottom: '10px' }}>
+              <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Other Monthly Bills</h4>
+              <div style={{ marginLeft: '20px' }}>
+                {hasOtherBills() ? (
+                  <>
+                    {Number(family.student_loans || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Student Loans</b> (Pay to U Trust US National Bank): ${Number(family.student_loans).toFixed(2)}</p>
+                    )}
+                    {Number(family.clothing || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Clothing</b> (Pay to Food-A-Rama Super Center): ${Number(family.clothing).toFixed(2)}</p>
+                    )}
+                    {Number(family.prescriptions || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Prescriptions</b> (Pay to Food-A-Rama Super Center): ${Number(family.prescriptions).toFixed(2)}</p>
+                    )}
+                    {Number(family.misc_supercenter || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Miscellaneous</b> (Pay to Food-A-Rama Super Center): ${Number(family.misc_supercenter).toFixed(2)}</p>
+                    )}
+                    {Number(family.misc_bank || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Miscellaneous</b> (Pay to U Trust US National Bank): ${Number(family.misc_bank).toFixed(2)}</p>
+                    )}
+                    {Number(family.medical || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Medical</b> (Pay to Community Healthcare): ${Number(family.medical).toFixed(2)}</p>
+                    )}
+                    {Number(family.credit_card || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Credit Card Minimum Payment</b> (Pay to U Trust US National Bank): ${Number(family.credit_card).toFixed(2)}</p>
+                    )}
+                    {Number(family.automobile_loan || 0) > 0 && (
+                      <p style={{ margin: '5px 0' }}><b>Automobile Loan</b> (Pay to U Trust US National Bank): ${Number(family.automobile_loan).toFixed(2)}</p>
+                    )}
+                  </>
+                ) : (
+                  <p style={{ margin: '5px 0', color: '#666' }}>No other monthly charges at this time.</p>
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          {/* Total Amount Due This Month */}
+
+          <div style={{ backgroundColor: '#ffebee', padding: '15px', borderRadius: '8px', marginBottom: '20px' }}>
+            <h3 style={{ margin: '0 0 10px 0', color: '#c62828' }}>Total Amount Due</h3>
+            {(calculateMonthlyBills() + calculateFoodDue()).toFixed(2) > 0 ? (
+              <>
                 <p style={{ fontSize: '24px', fontWeight: 'bold', margin: 0, color: '#c62828' }}>
                   ${(calculateMonthlyBills() + calculateFoodDue()).toFixed(2)}
                 </p>
 
-                <p style={{ fontSize: '14px', margin: '5px 0', color:'#666' }}>
+                <p style={{ fontSize: '14px', margin: '5px 0', color: '#666' }}>
                   <b>Total Monthly Bills:</b> ${calculateMonthlyBills().toFixed(2)}
                 </p>
-                {family.food_weekly > 0 && (
-                    <p style={{ fontSize: '14px', margin: '5px 0', color:'#666' }}>
-                      <b>Food (Weekly):</b> ${Number(family.food_weekly).toFixed(2)}
-                    </p>
+                {calculateFoodDue().toFixed(2) > 0 && (
+                  <p style={{ fontSize: '14px', margin: '5px 0', color: '#666' }}>
+                    <b>Food (Weekly):</b> ${Number(family.food_weekly).toFixed(2)}
+                  </p>
                 )}
+              </>
+            ) : (
+              <p style={{ fontSize: '18px', margin: 0, color: '#2e7d32' }}>
+                No bills due this month! Great work staying on top of payments.
+              </p>
+            )}
 
-              </div>
+          </div>
 
-            </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
   )
 }
