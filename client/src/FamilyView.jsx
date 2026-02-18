@@ -136,7 +136,7 @@ export default function FamilyView() {
                    {/* Food - Weekly */}
                 {family.food_weekly > 0 && (
                     <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
-                      <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Groceries (Pay to Food-A-Rama Super Center) - ${(Number(family.food_weekly) * 4).toFixed(2)}</h4>
+                      <h4 style={{ color: '#1976d2', marginBottom: '10px' }}>Groceries (Pay to Food-A-Rama Super Center) - ${calculateFoodDue().toFixed(2)}</h4>
                       <div style={{ marginLeft: '20px' }}>
                         <p style={{ margin: '5px 0' }}>
                           <b>Food:</b> ${Number(family.food_weekly).toFixed(2)} per week
