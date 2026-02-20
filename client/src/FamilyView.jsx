@@ -190,7 +190,7 @@ export default function FamilyView() {
               </h4>
               <div style={{ marginLeft: '20px' }}>
                 {family.housing_mortgage > 0 && (
-                  <p style={{ margin: '5px 0' }}><b>Mortgage:</b> ${Number(family.housing_mortgage).toFixed(2)}</p>
+                  <p style={{ margin: '5px 0' }}><b>Mortgage/Rent:</b> ${Number(family.housing_mortgage).toFixed(2)}</p>
                 )}
                 {family.housing_taxes > 0 && (
                   <p style={{ margin: '5px 0' }}><b>Taxes:</b> ${Number(family.housing_taxes).toFixed(2)}</p>

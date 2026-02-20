@@ -165,7 +165,7 @@ async function payBill(familyId, billType, amount, week = null) {
         throw new Error('Amount must be > 0 and <= 1000');
     }
 
-    const validBillTypes = ['gas', 'electric', 'phone', 'autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance', 'clothing', 'food', 'quikCash', 'prescriptions', 'misc_bank', 'misc_supercenter'];
+    const validBillTypes = ['gas', 'electric', 'phone', 'autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance', 'clothing', 'food', 'quikCash', 'prescriptions', 'miscBank', 'miscSupercenter'];
     if (!validBillTypes.includes(billType)) {
         throw new Error(`Invalid bill type. Must be one of: ${validBillTypes.join(', ')}`);
     }
@@ -206,6 +206,7 @@ async function payBill(familyId, billType, amount, week = null) {
     };
 
     const dbField = fieldMap[billType];
+    console.log(`Processing payment for bill type: ${billType} (DB field: ${dbField}), Amount: $${amount.toFixed(2)}`);
     const amountOwed = Number(family[dbField] || 0);
 
     if (['autoLoan', 'studentLoan', 'creditCard', 'mortgage', 'taxes', 'maintenance'].includes(billType)) {
@@ -227,6 +228,7 @@ async function payBill(familyId, billType, amount, week = null) {
         const weekField = `food_week${week}_paid`;
         updateSql += `, ${weekField} = 1`;
     } else {
+        // console.log(`Updating bill: ${billType} (DB field: ${dbField}) from $${amountOwed.toFixed(2)} to $${newBillAmount.toFixed(2)}`);
         // For other bills, update the bill amount
         updateSql += `, ${dbField} = ?`;
         params.push(newBillAmount);

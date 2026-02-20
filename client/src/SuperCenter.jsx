@@ -65,10 +65,10 @@ export default function SuperCenter() {
 
         const amount = billType === 'food' ? Number(foodPayment) :
             billType === 'clothing' ? Number(clothingPayment) :
-                billType === 'misc_supercenter' ? Number(miscPayment) :
+                billType === 'miscSupercenter' ? Number(miscPayment) :
                     Number(prescriptionsPayment)
 
-if (!amount || amount <= 0 || amount > 1000) {
+        if (!amount || amount <= 0 || amount > 1000) {
             setError('Amount must be > 0 and ≤ 1000')
             return
         }
@@ -77,7 +77,7 @@ if (!amount || amount <= 0 || amount > 1000) {
             // Build request body
             const body = {
                 family_id: selectedFamily.id,
-                bill_type: billType === 'misc_supercenter' ? 'quikCash' : billType,
+                bill_type: billType,
                 amount: amount
             }
 
@@ -104,7 +104,7 @@ if (!amount || amount <= 0 || amount > 1000) {
 
             if (billType === 'food') setFoodPayment(updatedFamily?.food_weekly || 0)
             if (billType === 'clothing') setClothingPayment('')
-            if (billType === 'misc_supercenter') setMiscPayment('')
+            if (billType === 'miscSupercenter') setMiscPayment('')
             if (billType === 'prescriptions') setPrescriptionsPayment('')
 
             setError(null)
@@ -218,12 +218,12 @@ if (!amount || amount <= 0 || amount > 1000) {
                                             ${(selectedFamily.misc_supercenter || 0).toFixed(2)}
                                         </p>
                                         <input
-                                            type="number"                                            min="0.01"
+                                            type="number" min="0.01"
                                             max="1000"
-                                            step="0.01"                                            value={miscPayment}
+                                            step="0.01" value={miscPayment}
                                             onChange={(e) => setMiscPayment(e.target.value)}
                                         />
-                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('misc')}>
+                                        <button style={{ marginLeft: 10 }} onClick={() => handlePayment('miscSupercenter')}>
                                             PAY
                                         </button>
                                         <br></br><br></br>
@@ -256,10 +256,10 @@ if (!amount || amount <= 0 || amount > 1000) {
                         <div className="col-md-4">
                             <br></br>
                             <p id="helptext">*Do <u>NOT</u> make any payments without a family member present.
-                            <br></br><br></br>
-                            *If a family member gives you a prescription, fill it for $20.
-                            <br></br><br></br>
-                            *Your part-time employees are paid in <u>cash only</u>.</p>
+                                <br></br><br></br>
+                                *If a family member gives you a prescription, fill it for $20.
+                                <br></br><br></br>
+                                *Your part-time employees are paid in <u>cash only</u>.</p>
                         </div>
                     </div>
                 </div>

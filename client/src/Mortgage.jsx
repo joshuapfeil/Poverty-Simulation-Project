@@ -132,7 +132,7 @@ export default function Mortgage() {
                             <div>
                                 {selectedFamily.housing_mortgage > 0 && (
                                     <div>
-                                        <h4>Mortgage Payment</h4>
+                                        <h4>Mortgage/Rent Payment</h4>
                                         <p>
                                             Amount Owed: ${(selectedFamily.housing_mortgage || 0).toFixed(2)}
                                         </p>
