@@ -147,6 +147,7 @@ export default function Mortgage() {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('mortgage')}>
                                             PAY
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
 
@@ -167,6 +168,7 @@ export default function Mortgage() {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('taxes')}>
                                             PAY
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
 
@@ -187,6 +189,7 @@ export default function Mortgage() {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('maintenance')}>
                                             PAY
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
                             </div>

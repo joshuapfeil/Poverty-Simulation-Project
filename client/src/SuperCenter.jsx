@@ -187,6 +187,7 @@ if (!amount || amount <= 0 || amount > 1000) {
                                     >
                                         {isWeekPaid ? 'PAID' : 'PAY'}
                                     </button>
+                                    <br></br><br></br>
                                 </div>
 
                                 {selectedFamily.clothing > 0 && (
@@ -206,6 +207,7 @@ if (!amount || amount <= 0 || amount > 1000) {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('clothing')}>
                                             PAY
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
 
@@ -224,12 +226,13 @@ if (!amount || amount <= 0 || amount > 1000) {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('misc')}>
                                             PAY
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
 
                                 {selectedFamily.prescriptions > 0 && (
                                     <div>
-                                        <h4>Prescription?</h4>
+                                        <h4>Fill Prescription</h4>
                                         <p>
                                             ${(selectedFamily.prescriptions || 0).toFixed(2)}
                                         </p>
@@ -244,6 +247,7 @@ if (!amount || amount <= 0 || amount > 1000) {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('prescriptions')}>
                                             PAY
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
 
@@ -252,6 +256,8 @@ if (!amount || amount <= 0 || amount > 1000) {
                         <div className="col-md-4">
                             <br></br>
                             <p id="helptext">*Do <u>NOT</u> make any payments without a family member present.
+                            <br></br><br></br>
+                            *If a family member gives you a prescription, fill it for $20.
                             <br></br><br></br>
                             *Your part-time employees are paid in <u>cash only</u>.</p>
                         </div>

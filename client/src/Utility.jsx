@@ -172,6 +172,7 @@ export default function Utility() {
                         >
                             {processingFee ? 'Processing...' : 'Charge $50 Fee'}
                         </button>
+                        <br></br><br></br>
                     </div>
 
                     <div className="row">
@@ -194,6 +195,7 @@ export default function Utility() {
                                     <button style={{ marginLeft: 10 }} onClick={() => handlePayment('gas')}>
                                         PAY
                                     </button>
+                                    <br></br><br></br>
                                 </div>
                             )}
 
@@ -214,6 +216,7 @@ export default function Utility() {
                                     <button style={{ marginLeft: 10 }} onClick={() => handlePayment('phone')}>
                                         PAY
                                     </button>
+                                    <br></br><br></br>
                                 </div>
                             )}
 
@@ -234,6 +237,7 @@ export default function Utility() {
                                     <button style={{ marginLeft: 10 }} onClick={() => handlePayment('electric')}>
                                         PAY
                                     </button>
+                                    <br></br><br></br>
                                 </div>
                             )}
                         </div>
@@ -241,6 +245,8 @@ export default function Utility() {
                         <div className="col-md-4">
                             <br></br>
                             <p id="helptext">*Families may pay their utility bills in mulitple installments or all at once.
+                                <br></br><br></br>
+                                *If a family's utilities have been shut off, make them pay the $50 fee to turn them back on.
                                 <br></br><br></br>
                                 *Do <u>NOT</u> make a bill payment without a family member present.
                             </p>

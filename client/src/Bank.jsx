@@ -157,7 +157,6 @@ export default function Bank() {
                     <div className="row">
                         <div className="col-md-8">
 
-
                             <div>
                                 <div>
                                     <h4>Deposit</h4>
@@ -171,8 +170,8 @@ export default function Bank() {
                                         placeholder="Enter amount"
                                     />
                                     <button style={{ marginLeft: 10 }} onClick={() => handlePayment('deposit')}>Deposit</button>
+                                    <br></br><br></br>
                                 </div>
-                                <br></br>
 
                                 <div style={{ marginBottom: '20px', paddingBottom: '15px', borderBottom: '1px solid #eee' }}>
                                     <h4>Withdraw</h4>
@@ -186,6 +185,7 @@ export default function Bank() {
                                         placeholder="Enter amount"
                                     />
                                     <button style={{ marginLeft: 10 }} onClick={() => handlePayment('withdraw')}>Withdraw</button>
+                                    <br></br><br></br>
                                 </div>
 
                                 {selectedFamily.automobile_loan > 0 && (
@@ -203,10 +203,9 @@ export default function Bank() {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('autoLoan')}>
                                             Pay Auto Loan
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
-
-                                <br></br>
 
                                 {selectedFamily.student_loans > 0 && (
                                     <div>
@@ -223,10 +222,10 @@ export default function Bank() {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('studentLoan')}>
                                             Pay Student Loan
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
 
-                                <br></br>
 
                                 {selectedFamily.credit_card > 0 && (
                                     <div>
@@ -243,11 +242,12 @@ export default function Bank() {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('creditCard')}>
                                             Pay Credit Card
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
                                 {selectedFamily.misc_bank > 0 && (
                                     <div>
-                                        <h4>Miscelanious Payments</h4>
+                                        <h4>Miscellaneous Payments</h4>
                                         <p>Amount Owed: ${(selectedFamily.misc_bank || 0).toFixed(2)}</p>
                                         <input
                                             type="number"
@@ -260,6 +260,7 @@ export default function Bank() {
                                         <button style={{ marginLeft: 10 }} onClick={() => handlePayment('miscBank')}>
                                             Pay Miscellaneous
                                         </button>
+                                        <br></br><br></br>
                                     </div>
                                 )}
                             </div>
