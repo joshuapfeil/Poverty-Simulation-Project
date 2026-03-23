@@ -4,10 +4,8 @@
   "description": "Website using CRUD API to work poverty simulation project",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "build": "cd client && npm ci && npm run build",
-    "client:build": "cd client && npm ci && npm run build",
-    "postinstall": "cd client && npm ci",
+    "start": "node index.js && cd ./client && npm run dev",
+    "build": "npm ci && cd client && npm ci && npm run build",
     "test": "node index.js"
   },
  
