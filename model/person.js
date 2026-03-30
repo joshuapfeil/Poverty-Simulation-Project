@@ -18,6 +18,7 @@ async function getAll(filter = {}) {
         selectSql += ` WHERE family_id = ?`;
         params.push(filter.family_id);
     }
+    selectSql += ` ORDER BY COALESCE(last_name, '') COLLATE NOCASE ASC, COALESCE(first_name, '') COLLATE NOCASE ASC, id ASC`;
     const results = await connection.query(selectSql, params);
     return results;
 }

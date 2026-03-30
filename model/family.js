@@ -12,7 +12,7 @@ async function get(id) {
 }
 
 async function getAll() {
-    let selectSql = `SELECT * FROM families`;
+    let selectSql = `SELECT * FROM families ORDER BY COALESCE(name, '') COLLATE NOCASE ASC, id ASC`;
     const results = await connection.query(selectSql);
     return results;
 }

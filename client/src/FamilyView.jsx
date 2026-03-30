@@ -282,7 +282,7 @@ export default function FamilyView() {
                 </p>
                 {calculateFoodDue().toFixed(2) > 0 && (
                   <p style={{ fontSize: '14px', margin: '5px 0', color: '#666' }}>
-                    <b>Food (Weekly):</b> ${Number(family.food_weekly).toFixed(2)}
+                    <b>Food (Weekly):</b> ${Number(family.food_weekly).toFixed(2)}   <b>Total Food:</b> ${(Number(family.food_weekly) * calculateUnpaidFoodWeeks()).toFixed(2)}
                   </p>
                 )}
               </>
